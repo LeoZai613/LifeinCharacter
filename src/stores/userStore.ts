@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import type { Character, CharacterStats } from '../types/character';
+import type { Character, CharacterStats, Habit } from '../types/character';
 
 interface User {
   email: string;
@@ -15,6 +15,8 @@ interface UserStore {
   signup: (email: string, password: string, username: string) => boolean;
   logout: () => void;
   setCharacter: (stats: CharacterStats) => void;
+  addHabit: (habit: Omit<Habit, 'id' | 'completed' | 'streak'>) => void;
+  completeHabit: (habitId: string) => void;
 }
 
 const createInitialCharacter = (stats: CharacterStats): Character => ({
@@ -52,38 +54,35 @@ export const useUserStore = create<UserStore>((set) => ({
     }
 
     // Create new user
-    const newUser = {
+    const newUser: User = {
       email,
-      username,
       password,
-      character: null
+      username,
+      character: null,
     };
 
     // Save to localStorage
     localStorage.setItem(email, JSON.stringify(newUser));
-    
-    // Update state
+
+    // Update store
     set({ user: newUser, isAuthenticated: true });
     return true;
   },
 
   login: (email: string, password: string) => {
     // Get user from localStorage
-    const storedUser = localStorage.getItem(email);
-    if (!storedUser) {
+    const userJson = localStorage.getItem(email);
+    if (!userJson) {
       return false;
     }
 
-    // Parse user data
-    const user = JSON.parse(storedUser);
-    
-    // Check password
-    if (user.password !== password) {
+    const storedUser: User = JSON.parse(userJson);
+    if (storedUser.password !== password) {
       return false;
     }
 
-    // Update state
-    set({ user, isAuthenticated: true });
+    // Update store
+    set({ user: storedUser, isAuthenticated: true });
     return true;
   },
 
@@ -97,13 +96,69 @@ export const useUserStore = create<UserStore>((set) => ({
 
       const updatedUser = {
         ...state.user,
-        character: createInitialCharacter(stats)
+        character: createInitialCharacter(stats),
       };
 
-      // Save to localStorage
+      // Update localStorage
       localStorage.setItem(updatedUser.email, JSON.stringify(updatedUser));
 
       return { user: updatedUser };
     });
-  }
+  },
+
+  addHabit: (habit) => {
+    set((state) => {
+      if (!state.user?.character) return state;
+
+      const newHabit: Habit = {
+        id: Date.now().toString(),
+        completed: false,
+        streak: 0,
+        ...habit,
+      };
+
+      const updatedUser = {
+        ...state.user,
+        character: {
+          ...state.user.character,
+          habits: [...state.user.character.habits, newHabit],
+        },
+      };
+
+      // Update localStorage
+      localStorage.setItem(updatedUser.email, JSON.stringify(updatedUser));
+
+      return { user: updatedUser };
+    });
+  },
+
+  completeHabit: (habitId) => {
+    set((state) => {
+      if (!state.user?.character) return state;
+
+      const updatedHabits = state.user.character.habits.map(habit =>
+        habit.id === habitId
+          ? { 
+              ...habit, 
+              completed: true,
+              streak: habit.streak + 1,
+            }
+          : habit
+      );
+
+      const updatedUser = {
+        ...state.user,
+        character: {
+          ...state.user.character,
+          habits: updatedHabits,
+          experience: state.user.character.experience + 10, // Add XP for completing habit
+        },
+      };
+
+      // Update localStorage
+      localStorage.setItem(updatedUser.email, JSON.stringify(updatedUser));
+
+      return { user: updatedUser };
+    });
+  },
 }));

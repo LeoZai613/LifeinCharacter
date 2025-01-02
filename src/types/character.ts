@@ -7,50 +7,24 @@ export interface CharacterStats {
   charisma: number;
 }
 
-export interface BaseTask {
+export interface Habit {
   id: string;
   name: string;
   description: string;
+  frequency: 'daily' | 'weekly' | 'monthly';
   difficulty: 'trivial' | 'easy' | 'medium' | 'hard';
-  completed: boolean;
-  lastCompleted: string | null;
   associatedStat: keyof CharacterStats;
+  completed: boolean;
   streak: number;
-  history: {
-    completedAt: string;
-    streak: number;
-  }[];
-}
-
-export interface Habit extends BaseTask {
-  type: 'habit';
   schedule?: {
-    monday: boolean;
-    tuesday: boolean;
-    wednesday: boolean;
-    thursday: boolean;
-    friday: boolean;
-    saturday: boolean;
-    sunday: boolean;
+    monday?: boolean;
+    tuesday?: boolean;
+    wednesday?: boolean;
+    thursday?: boolean;
+    friday?: boolean;
+    saturday?: boolean;
+    sunday?: boolean;
   };
-}
-
-export interface Daily extends BaseTask {
-  type: 'daily';
-  schedule: {
-    monday: boolean;
-    tuesday: boolean;
-    wednesday: boolean;
-    thursday: boolean;
-    friday: boolean;
-    saturday: boolean;
-    sunday: boolean;
-  };
-}
-
-export interface Todo extends BaseTask {
-  type: 'todo';
-  dueDate?: string;
 }
 
 export interface Character {
@@ -72,6 +46,6 @@ export interface Character {
   stats: CharacterStats;
   battleTokens: number;
   habits: Habit[];
-  dailies: Daily[];
-  todos: Todo[];
+  dailies: any[];
+  todos: any[];
 }

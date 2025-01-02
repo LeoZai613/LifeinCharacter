@@ -1,10 +1,34 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useUserStore } from '../stores/userStore';
 import { CheckCircle, Circle, Flame, Calendar, Sword, Shield, Heart, Brain, Eye, MessageCircle } from 'lucide-react';
 
 export function CharacterDashboard() {
   const user = useUserStore((state) => state.user);
+  const addHabit = useUserStore((state) => state.addHabit);
+  const completeHabit = useUserStore((state) => state.completeHabit);
   const character = user?.character;
+
+  const [showNewHabitModal, setShowNewHabitModal] = useState(false);
+  const [newHabit, setNewHabit] = useState({
+    name: '',
+    description: '',
+    frequency: 'daily',
+    difficulty: 'easy',
+    associatedStat: 'strength',
+  });
+
+  const handleCreateHabit = (e: React.FormEvent) => {
+    e.preventDefault();
+    addHabit(newHabit);
+    setNewHabit({
+      name: '',
+      description: '',
+      frequency: 'daily',
+      difficulty: 'easy',
+      associatedStat: 'strength',
+    });
+    setShowNewHabitModal(false);
+  };
 
   const getStatIcon = (stat: string) => {
     const icons = {
@@ -77,7 +101,7 @@ export function CharacterDashboard() {
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-2xl font-bold">Daily Quests</h2>
           <button
-            onClick={() => {/* TODO: Add new habit */}}
+            onClick={() => setShowNewHabitModal(true)}
             className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:ring-offset-gray-900"
           >
             Add Quest
@@ -138,7 +162,7 @@ export function CharacterDashboard() {
                 </div>
 
                 <button
-                  onClick={() => {/* TODO: Complete habit */}}
+                  onClick={() => completeHabit(habit.id)}
                   disabled={habit.completed}
                   className={`ml-4 p-2 rounded-full transition-colors ${
                     habit.completed
@@ -153,6 +177,85 @@ export function CharacterDashboard() {
           </div>
         )}
       </div>
+
+      {/* New Habit Modal */}
+      {showNewHabitModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center">
+          <div className="bg-gray-900 p-6 rounded-xl w-full max-w-md text-gray-100">
+            <h3 className="text-xl font-bold mb-4">Create New Quest</h3>
+            <form onSubmit={handleCreateHabit} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-400">Name</label>
+                <input
+                  type="text"
+                  value={newHabit.name}
+                  onChange={(e) => setNewHabit({ ...newHabit, name: e.target.value })}
+                  required
+                  className="mt-1 block w-full rounded-md bg-gray-800 border-gray-700 text-gray-100 focus:border-indigo-500 focus:ring-indigo-500"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-400">Description</label>
+                <textarea
+                  value={newHabit.description}
+                  onChange={(e) => setNewHabit({ ...newHabit, description: e.target.value })}
+                  required
+                  className="mt-1 block w-full rounded-md bg-gray-800 border-gray-700 text-gray-100 focus:border-indigo-500 focus:ring-indigo-500"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-400">Associated Stat</label>
+                <select
+                  value={newHabit.associatedStat}
+                  onChange={(e) => setNewHabit({ ...newHabit, associatedStat: e.target.value })}
+                  required
+                  className="mt-1 block w-full rounded-md bg-gray-800 border-gray-700 text-gray-100 focus:border-indigo-500 focus:ring-indigo-500"
+                >
+                  <option value="strength">Strength</option>
+                  <option value="dexterity">Dexterity</option>
+                  <option value="constitution">Constitution</option>
+                  <option value="intelligence">Intelligence</option>
+                  <option value="wisdom">Wisdom</option>
+                  <option value="charisma">Charisma</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-400">Difficulty</label>
+                <select
+                  value={newHabit.difficulty}
+                  onChange={(e) => setNewHabit({ ...newHabit, difficulty: e.target.value })}
+                  required
+                  className="mt-1 block w-full rounded-md bg-gray-800 border-gray-700 text-gray-100 focus:border-indigo-500 focus:ring-indigo-500"
+                >
+                  <option value="trivial">Trivial</option>
+                  <option value="easy">Easy</option>
+                  <option value="medium">Medium</option>
+                  <option value="hard">Hard</option>
+                </select>
+              </div>
+
+              <div className="flex gap-4 mt-6">
+                <button
+                  type="submit"
+                  className="flex-1 py-2 px-4 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:ring-offset-gray-900"
+                >
+                  Create
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowNewHabitModal(false)}
+                  className="flex-1 py-2 px-4 bg-gray-800 text-gray-300 rounded-md hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 focus:ring-offset-gray-900"
+                >
+                  Cancel
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
