@@ -1,12 +1,27 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useUserStore } from '../stores/userStore';
-import { CheckCircle, Circle, Flame, Calendar, Sword, Shield, Heart, Brain, Eye, MessageCircle } from 'lucide-react';
+import { CheckCircle, Circle, Flame, Calendar, Sword, Shield, Heart, Brain, Eye, MessageCircle, TrendingUp } from 'lucide-react';
+import type { CharacterStats } from '../types/character';
 
 export function CharacterDashboard() {
   const user = useUserStore((state) => state.user);
   const addHabit = useUserStore((state) => state.addHabit);
   const completeHabit = useUserStore((state) => state.completeHabit);
   const character = user?.character;
+
+  useEffect(() => {
+    if (character) {
+      console.log('Character:', {
+        stats: character.stats,
+        habits: character.habits.map(h => ({
+          name: h.name,
+          streak: h.streak,
+          completed: h.completed,
+          associatedStat: h.associatedStat
+        }))
+      });
+    }
+  }, [character]);
 
   const [showNewHabitModal, setShowNewHabitModal] = useState(false);
   const [newHabit, setNewHabit] = useState({
@@ -16,6 +31,62 @@ export function CharacterDashboard() {
     difficulty: 'easy',
     associatedStat: 'strength',
   });
+
+  // Calculate stat buffs from habit streaks
+  const statBuffs = useMemo(() => {
+    if (!character?.habits) return {};
+
+    const buffs: Partial<CharacterStats> = {};
+    
+    character.habits.forEach(habit => {
+      if (habit.streak > 0) {
+        const stat = habit.associatedStat as keyof CharacterStats;
+        // Increase buff amount to make it more noticeable
+        const buffAmount = Math.floor(habit.streak); // 1 point per streak level
+        buffs[stat] = (buffs[stat] || 0) + buffAmount;
+      }
+    });
+
+    console.log('Calculating buffs:', {
+      habits: character.habits.map(h => ({
+        name: h.name,
+        streak: h.streak,
+        stat: h.associatedStat,
+        buffAmount: h.streak > 0 ? Math.floor(h.streak) : 0
+      })),
+      calculatedBuffs: buffs
+    });
+
+    return buffs;
+  }, [character?.habits]);
+
+  useEffect(() => {
+    console.log('Stat buffs:', statBuffs);
+  }, [statBuffs]);
+
+  // Reset completed status of habits daily
+  useEffect(() => {
+    const resetHabits = () => {
+      if (!character?.habits) return;
+      
+      const now = new Date();
+      const lastReset = localStorage.getItem('lastHabitReset');
+      const lastResetDate = lastReset ? new Date(lastReset) : null;
+      
+      if (!lastResetDate || lastResetDate.getDate() !== now.getDate()) {
+        character.habits.forEach(habit => {
+          if (habit.completed) {
+            completeHabit(habit.id); // This will update the streak
+          }
+        });
+        localStorage.setItem('lastHabitReset', now.toISOString());
+      }
+    };
+
+    resetHabits();
+    const interval = setInterval(resetHabits, 60000); // Check every minute
+    return () => clearInterval(interval);
+  }, [character?.habits, completeHabit]);
 
   const handleCreateHabit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -28,6 +99,10 @@ export function CharacterDashboard() {
       associatedStat: 'strength',
     });
     setShowNewHabitModal(false);
+  };
+
+  const handleCompleteHabit = (habitId: string) => {
+    completeHabit(habitId);
   };
 
   const getStatIcon = (stat: string) => {
@@ -68,17 +143,26 @@ export function CharacterDashboard() {
         </p>
         
         <div className="grid grid-cols-2 gap-4">
-          {character?.stats && Object.entries(character.stats).map(([stat, value]) => (
-            <div key={stat} className="bg-gray-800 p-4 rounded-lg flex items-start gap-3">
-              {getStatIcon(stat)}
-              <div>
-                <div className="text-gray-400 text-sm">
-                  {stat.charAt(0).toUpperCase() + stat.slice(1)}
+          {character?.stats && Object.entries(character.stats).map(([stat, value]) => {
+            const buff = statBuffs[stat as keyof CharacterStats] || 0;
+            console.log(`Rendering stat ${stat}:`, { baseValue: value, buff });
+            return (
+              <div key={stat} className="bg-gray-800 p-4 rounded-lg flex items-start gap-3">
+                {getStatIcon(stat)}
+                <div className="flex-1">
+                  <div className="text-gray-400 text-sm">
+                    {stat.charAt(0).toUpperCase() + stat.slice(1)}
+                  </div>
+                  <div className="flex items-baseline gap-2">
+                    <span className="text-2xl font-bold text-white">{value}</span>
+                    {buff > 0 && (
+                      <span className="text-sm text-green-400">+{buff}</span>
+                    )}
+                  </div>
                 </div>
-                <div className="text-2xl font-bold">{value}</div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
 
         <div className="grid grid-cols-2 gap-4 mt-6">
@@ -162,7 +246,7 @@ export function CharacterDashboard() {
                 </div>
 
                 <button
-                  onClick={() => completeHabit(habit.id)}
+                  onClick={() => handleCompleteHabit(habit.id)}
                   disabled={habit.completed}
                   className={`ml-4 p-2 rounded-full transition-colors ${
                     habit.completed

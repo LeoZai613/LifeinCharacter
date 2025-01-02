@@ -42,18 +42,33 @@ const createInitialCharacter = (stats: CharacterStats): Character => ({
   todos: []
 });
 
-export const useUserStore = create<UserStore>((set) => ({
+// Helper function to save user data
+const saveUser = (user: User) => {
+  localStorage.setItem(user.email, JSON.stringify(user));
+  console.log('Saved user data:', {
+    email: user.email,
+    character: {
+      stats: user.character?.stats,
+      habits: user.character?.habits.map(h => ({
+        name: h.name,
+        streak: h.streak,
+        completed: h.completed,
+        associatedStat: h.associatedStat
+      }))
+    }
+  });
+};
+
+export const useUserStore = create<UserStore>((set, get) => ({
   user: null,
   isAuthenticated: false,
 
   signup: (email: string, password: string, username: string) => {
-    // Check if user exists in localStorage
     const existingUser = localStorage.getItem(email);
     if (existingUser) {
       return false;
     }
 
-    // Create new user
     const newUser: User = {
       email,
       password,
@@ -61,16 +76,12 @@ export const useUserStore = create<UserStore>((set) => ({
       character: null,
     };
 
-    // Save to localStorage
-    localStorage.setItem(email, JSON.stringify(newUser));
-
-    // Update store
+    saveUser(newUser);
     set({ user: newUser, isAuthenticated: true });
     return true;
   },
 
   login: (email: string, password: string) => {
-    // Get user from localStorage
     const userJson = localStorage.getItem(email);
     if (!userJson) {
       return false;
@@ -81,7 +92,18 @@ export const useUserStore = create<UserStore>((set) => ({
       return false;
     }
 
-    // Update store
+    console.log('Loaded user data:', {
+      email: storedUser.email,
+      character: {
+        stats: storedUser.character?.stats,
+        habits: storedUser.character?.habits.map(h => ({
+          name: h.name,
+          streak: h.streak,
+          completed: h.completed,
+          associatedStat: h.associatedStat
+        }))
+      }
+    });
     set({ user: storedUser, isAuthenticated: true });
     return true;
   },
@@ -91,74 +113,73 @@ export const useUserStore = create<UserStore>((set) => ({
   },
 
   setCharacter: (stats: CharacterStats) => {
-    set((state) => {
-      if (!state.user) return state;
+    const state = get();
+    if (!state.user) return;
 
-      const updatedUser = {
-        ...state.user,
-        character: createInitialCharacter(stats),
-      };
+    const updatedUser = {
+      ...state.user,
+      character: createInitialCharacter(stats),
+    };
 
-      // Update localStorage
-      localStorage.setItem(updatedUser.email, JSON.stringify(updatedUser));
-
-      return { user: updatedUser };
-    });
+    saveUser(updatedUser);
+    set({ user: updatedUser });
   },
 
   addHabit: (habit) => {
-    set((state) => {
-      if (!state.user?.character) return state;
+    const state = get();
+    if (!state.user?.character) return;
 
-      const newHabit: Habit = {
-        id: Date.now().toString(),
-        completed: false,
-        streak: 0,
-        ...habit,
-      };
+    const newHabit: Habit = {
+      id: Date.now().toString(),
+      completed: false,
+      streak: 0,
+      ...habit,
+    };
 
-      const updatedUser = {
-        ...state.user,
-        character: {
-          ...state.user.character,
-          habits: [...state.user.character.habits, newHabit],
-        },
-      };
+    const updatedUser = {
+      ...state.user,
+      character: {
+        ...state.user.character,
+        habits: [...state.user.character.habits, newHabit],
+      },
+    };
 
-      // Update localStorage
-      localStorage.setItem(updatedUser.email, JSON.stringify(updatedUser));
-
-      return { user: updatedUser };
-    });
+    saveUser(updatedUser);
+    set({ user: updatedUser });
   },
 
-  completeHabit: (habitId) => {
-    set((state) => {
-      if (!state.user?.character) return state;
+  completeHabit: (habitId: string) => {
+    const state = get();
+    if (!state.user?.character) return;
 
-      const updatedHabits = state.user.character.habits.map(habit =>
-        habit.id === habitId
-          ? { 
-              ...habit, 
-              completed: true,
-              streak: habit.streak + 1,
-            }
-          : habit
-      );
+    const habit = state.user.character.habits.find(h => h.id === habitId);
+    if (!habit || habit.completed) return;
 
-      const updatedUser = {
-        ...state.user,
-        character: {
-          ...state.user.character,
-          habits: updatedHabits,
-          experience: state.user.character.experience + 10, // Add XP for completing habit
-        },
-      };
+    const updatedUser = {
+      ...state.user,
+      character: {
+        ...state.user.character,
+        habits: state.user.character.habits.map(h =>
+          h.id === habitId
+            ? { 
+                ...h, 
+                completed: true,
+                streak: h.streak + 1,
+              }
+            : h
+        ),
+        experience: state.user.character.experience + 10,
+      },
+    };
 
-      // Update localStorage
-      localStorage.setItem(updatedUser.email, JSON.stringify(updatedUser));
-
-      return { user: updatedUser };
+    console.log('Completing habit:', {
+      habitId,
+      beforeStreak: habit.streak,
+      afterStreak: habit.streak + 1,
+      updatedHabit: updatedUser.character.habits.find(h => h.id === habitId)
     });
+
+    saveUser(updatedUser);
+    set({ user: updatedUser });
   },
 }));
