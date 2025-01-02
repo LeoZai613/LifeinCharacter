@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import type { Character, CharacterStats, Habit } from '../types/character';
+import type { Character, CharacterStats, Daily, Habit, Todo, TaskDifficulty } from '../types/character';
 
 interface User {
   email: string;
@@ -15,8 +15,12 @@ interface UserStore {
   signup: (email: string, password: string, username: string) => boolean;
   logout: () => void;
   setCharacter: (stats: CharacterStats) => void;
-  addHabit: (habit: Omit<Habit, 'id' | 'completed' | 'streak'>) => void;
-  completeHabit: (habitId: string) => void;
+  addHabit: (habit: Omit<Habit, 'id' | 'type' | 'count'>) => void;
+  addDaily: (daily: Omit<Daily, 'id' | 'type' | 'completed' | 'streak'>) => void;
+  addTodo: (todo: Omit<Todo, 'id' | 'type' | 'completed'>) => void;
+  completeDaily: (dailyId: string) => void;
+  completeTodo: (todoId: string) => void;
+  toggleHabit: (habitId: string, positive: boolean) => void;
 }
 
 const createInitialCharacter = (stats: CharacterStats): Character => ({
@@ -49,12 +53,9 @@ const saveUser = (user: User) => {
     email: user.email,
     character: {
       stats: user.character?.stats,
-      habits: user.character?.habits.map(h => ({
-        name: h.name,
-        streak: h.streak,
-        completed: h.completed,
-        associatedStat: h.associatedStat
-      }))
+      habits: user.character?.habits.length,
+      dailies: user.character?.dailies.length,
+      todos: user.character?.todos.length
     }
   });
 };
@@ -96,12 +97,9 @@ export const useUserStore = create<UserStore>((set, get) => ({
       email: storedUser.email,
       character: {
         stats: storedUser.character?.stats,
-        habits: storedUser.character?.habits.map(h => ({
-          name: h.name,
-          streak: h.streak,
-          completed: h.completed,
-          associatedStat: h.associatedStat
-        }))
+        habits: storedUser.character?.habits.length,
+        dailies: storedUser.character?.dailies.length,
+        todos: storedUser.character?.todos.length
       }
     });
     set({ user: storedUser, isAuthenticated: true });
@@ -131,8 +129,8 @@ export const useUserStore = create<UserStore>((set, get) => ({
 
     const newHabit: Habit = {
       id: Date.now().toString(),
-      completed: false,
-      streak: 0,
+      type: 'habit',
+      count: 0,
       ...habit,
     };
 
@@ -148,12 +146,111 @@ export const useUserStore = create<UserStore>((set, get) => ({
     set({ user: updatedUser });
   },
 
-  completeHabit: (habitId: string) => {
+  addDaily: (daily) => {
+    const state = get();
+    if (!state.user?.character) return;
+
+    const newDaily: Daily = {
+      id: Date.now().toString(),
+      type: 'daily',
+      completed: false,
+      streak: 0,
+      ...daily,
+    };
+
+    const updatedUser = {
+      ...state.user,
+      character: {
+        ...state.user.character,
+        dailies: [...state.user.character.dailies, newDaily],
+      },
+    };
+
+    saveUser(updatedUser);
+    set({ user: updatedUser });
+  },
+
+  addTodo: (todo) => {
+    const state = get();
+    if (!state.user?.character) return;
+
+    const newTodo: Todo = {
+      id: Date.now().toString(),
+      type: 'todo',
+      completed: false,
+      ...todo,
+    };
+
+    const updatedUser = {
+      ...state.user,
+      character: {
+        ...state.user.character,
+        todos: [...state.user.character.todos, newTodo],
+      },
+    };
+
+    saveUser(updatedUser);
+    set({ user: updatedUser });
+  },
+
+  completeDaily: (dailyId: string) => {
+    const state = get();
+    if (!state.user?.character) return;
+
+    const daily = state.user.character.dailies.find(d => d.id === dailyId);
+    if (!daily || daily.completed) return;
+
+    const updatedUser = {
+      ...state.user,
+      character: {
+        ...state.user.character,
+        dailies: state.user.character.dailies.map(d =>
+          d.id === dailyId
+            ? { 
+                ...d, 
+                completed: true,
+                streak: d.streak + 1,
+              }
+            : d
+        ),
+        experience: state.user.character.experience + 10,
+      },
+    };
+
+    saveUser(updatedUser);
+    set({ user: updatedUser });
+  },
+
+  completeTodo: (todoId: string) => {
+    const state = get();
+    if (!state.user?.character) return;
+
+    const todo = state.user.character.todos.find(t => t.id === todoId);
+    if (!todo || todo.completed) return;
+
+    const updatedUser = {
+      ...state.user,
+      character: {
+        ...state.user.character,
+        todos: state.user.character.todos.map(t =>
+          t.id === todoId
+            ? { ...t, completed: true }
+            : t
+        ),
+        experience: state.user.character.experience + 15, // More XP for todos
+      },
+    };
+
+    saveUser(updatedUser);
+    set({ user: updatedUser });
+  },
+
+  toggleHabit: (habitId: string, positive: boolean) => {
     const state = get();
     if (!state.user?.character) return;
 
     const habit = state.user.character.habits.find(h => h.id === habitId);
-    if (!habit || habit.completed) return;
+    if (!habit) return;
 
     const updatedUser = {
       ...state.user,
@@ -161,23 +258,12 @@ export const useUserStore = create<UserStore>((set, get) => ({
         ...state.user.character,
         habits: state.user.character.habits.map(h =>
           h.id === habitId
-            ? { 
-                ...h, 
-                completed: true,
-                streak: h.streak + 1,
-              }
+            ? { ...h, count: h.count + (positive ? 1 : -1) }
             : h
         ),
-        experience: state.user.character.experience + 10,
+        experience: state.user.character.experience + (positive ? 5 : -5),
       },
     };
-
-    console.log('Completing habit:', {
-      habitId,
-      beforeStreak: habit.streak,
-      afterStreak: habit.streak + 1,
-      updatedHabit: updatedUser.character.habits.find(h => h.id === habitId)
-    });
 
     saveUser(updatedUser);
     set({ user: updatedUser });

@@ -7,13 +7,27 @@ export interface CharacterStats {
   charisma: number;
 }
 
-export interface Habit {
+export type TaskDifficulty = 'trivial' | 'easy' | 'medium' | 'hard';
+export type TaskFrequency = 'daily' | 'weekly' | 'monthly';
+
+interface BaseTask {
   id: string;
   name: string;
   description: string;
-  frequency: 'daily' | 'weekly' | 'monthly';
-  difficulty: 'trivial' | 'easy' | 'medium' | 'hard';
+  difficulty: TaskDifficulty;
   associatedStat: keyof CharacterStats;
+}
+
+export interface Habit extends BaseTask {
+  type: 'habit';
+  positive: boolean;
+  negative: boolean;
+  count: number;
+}
+
+export interface Daily extends BaseTask {
+  type: 'daily';
+  frequency: TaskFrequency;
   completed: boolean;
   streak: number;
   schedule?: {
@@ -25,6 +39,17 @@ export interface Habit {
     saturday?: boolean;
     sunday?: boolean;
   };
+}
+
+export interface Todo extends BaseTask {
+  type: 'todo';
+  completed: boolean;
+  dueDate?: string;
+  checklist?: {
+    id: string;
+    text: string;
+    completed: boolean;
+  }[];
 }
 
 export interface Character {
@@ -46,6 +71,6 @@ export interface Character {
   stats: CharacterStats;
   battleTokens: number;
   habits: Habit[];
-  dailies: any[];
-  todos: any[];
+  dailies: Daily[];
+  todos: Todo[];
 }
