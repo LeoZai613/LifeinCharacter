@@ -1,98 +1,62 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { CharacterSheet } from './components/CharacterSheet';
 import { HabitTracker } from './components/HabitTracker';
 import { CharacterQuiz } from './components/CharacterQuiz';
-import type { Character, Habit, CharacterStats } from './types/character';
-
-// Initial character data without stats
-const createCharacter = (stats: CharacterStats): Character => ({
-  id: '1',
-  name: 'Adventurer',
-  race: 'Human',
-  class: 'Fighter',
-  level: 1,
-  experience: 0,
-  stats,
-  battleTokens: 0,
-  habits: [
-    {
-      id: '1',
-      name: 'Morning Workout',
-      description: 'Complete a 30-minute strength training session',
-      frequency: 'daily',
-      difficulty: 'medium',
-      associatedStat: 'strength',
-      completed: false,
-      streak: 0
-    },
-    {
-      id: '2',
-      name: 'Meditation',
-      description: 'Practice mindfulness for 10 minutes',
-      frequency: 'daily',
-      difficulty: 'easy',
-      associatedStat: 'wisdom',
-      completed: false,
-      streak: 0
-    },
-    {
-      id: '3',
-      name: 'Coding Challenge',
-      description: 'Solve one programming puzzle',
-      frequency: 'daily',
-      difficulty: 'hard',
-      associatedStat: 'intelligence',
-      completed: false,
-      streak: 0
-    }
-  ]
-});
+import { Auth } from './components/Auth';
+import { useUserStore } from './stores/userStore';
+import type { CharacterStats } from './types/character';
 
 function App() {
-  const [character, setCharacter] = useState<Character | null>(null);
+  const isAuthenticated = useUserStore((state) => state.isAuthenticated);
+  const user = useUserStore((state) => state.user);
+  const setCharacter = useUserStore((state) => state.setCharacter);
+  const logout = useUserStore((state) => state.logout);
 
   const handleQuizComplete = (stats: CharacterStats) => {
-    setCharacter(createCharacter(stats));
+    setCharacter(stats);
   };
 
   const handleHabitComplete = (habitId: string) => {
-    if (!character) return;
-
-    setCharacter(prev => {
-      if (!prev) return prev;
-      
-      const updatedHabits = prev.habits.map(habit =>
-        habit.id === habitId ? { ...habit, completed: true } : habit
-      );
-
-      const earnedToken = Math.random() < 0.2;
-      
-      return {
-        ...prev,
-        habits: updatedHabits,
-        experience: prev.experience + 10,
-        battleTokens: prev.battleTokens + (earnedToken ? 1 : 0)
-      };
-    });
+    // TODO: Update habit completion status in user store
+    console.log('Habit completed:', habitId);
   };
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white p-6">
-      <div className="max-w-2xl mx-auto space-y-6">
-        <h1 className="text-4xl font-bold text-center mb-8">Life In Character</h1>
-        
-        {!character ? (
-          <CharacterQuiz onComplete={handleQuizComplete} />
-        ) : (
-          <>
-            <CharacterSheet character={character} />
-            <HabitTracker 
-              habits={character.habits}
-              onComplete={handleHabitComplete}
-            />
-          </>
-        )}
-      </div>
+    <div className="min-h-screen bg-gray-100">
+      {!isAuthenticated ? (
+        <Auth />
+      ) : (
+        <div className="container mx-auto px-4 py-8">
+          <div className="flex justify-between items-center mb-8">
+            <h1 className="text-4xl font-bold">Life In Character</h1>
+            <div className="flex items-center gap-4">
+              <span className="text-gray-600">
+                Welcome, {user?.username}!
+              </span>
+              <button
+                onClick={logout}
+                className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
+              >
+                Logout
+              </button>
+            </div>
+          </div>
+          
+          <div className="max-w-2xl mx-auto space-y-6">
+            {!user?.character ? (
+              <CharacterQuiz onComplete={handleQuizComplete} />
+            ) : (
+              <>
+                <CharacterSheet character={user.character} />
+                <HabitTracker 
+                  habits={user.character.habits}
+                  onComplete={handleHabitComplete}
+                />
+              </>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
