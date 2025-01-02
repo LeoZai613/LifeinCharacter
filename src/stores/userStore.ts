@@ -82,15 +82,7 @@ export const useUserStore = create<UserStore>((set) => ({
           experience: 0,
           stats,
           battleTokens: 0,
-          habits: [
-            {
-              id: '1',
-              name: 'Morning Workout',
-              description: 'Complete a 30-minute strength training session',
-              completed: false,
-              lastCompleted: null
-            }
-          ]
+          habits: []
         }
       };
 

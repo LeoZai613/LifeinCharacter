@@ -27,5 +27,5 @@ export interface Habit {
   difficulty: 'easy' | 'medium' | 'hard';
   associatedStat: keyof CharacterStats;
   completed: boolean;
-  streak: number;
+  lastCompleted: string | null;
 }
