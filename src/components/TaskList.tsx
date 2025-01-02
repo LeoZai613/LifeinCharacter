@@ -109,7 +109,7 @@ export const TaskList: React.FC<TaskListProps> = ({
               <div className="flex justify-between items-center">
                 <span className="text-white">{habit.name}</span>
                 <div className="flex gap-2">
-                  {habit.positive && (
+                  {(habit.positive || !('positive' in habit)) && (
                     <button
                       onClick={() => onToggleHabit(habit.id, true)}
                       className="p-1 bg-green-600 rounded hover:bg-green-700"
@@ -127,7 +127,7 @@ export const TaskList: React.FC<TaskListProps> = ({
                   )}
                 </div>
               </div>
-              <div className="text-sm text-gray-400 mt-1">Count: {habit.count}</div>
+              <div className="text-sm text-gray-400 mt-1">Count: {habit.count || 0}</div>
             </div>
           ))}
         </div>

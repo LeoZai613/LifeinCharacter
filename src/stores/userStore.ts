@@ -93,15 +93,42 @@ export const useUserStore = create<UserStore>((set, get) => ({
       return false;
     }
 
+    // Migrate old habits to new format
+    if (storedUser.character?.habits) {
+      storedUser.character.habits = storedUser.character.habits.map(habit => {
+        if (!('type' in habit)) {
+          const oldHabit = habit as any;
+          return {
+            ...oldHabit,
+            type: 'habit',
+            count: oldHabit.streak || 0, // Convert streak to count
+            positive: true,
+            negative: false,
+            completed: undefined, // Remove old fields
+            streak: undefined,
+          };
+        }
+        return habit;
+      });
+
+      // Save migrated data
+      localStorage.setItem(email, JSON.stringify(storedUser));
+    }
+
     console.log('Loaded user data:', {
       email: storedUser.email,
       character: {
         stats: storedUser.character?.stats,
-        habits: storedUser.character?.habits.length,
-        dailies: storedUser.character?.dailies.length,
-        todos: storedUser.character?.todos.length
+        habits: storedUser.character?.habits.map(h => ({
+          name: h.name,
+          count: h.count,
+          type: h.type,
+          positive: h.positive,
+          negative: h.negative
+        }))
       }
     });
+    
     set({ user: storedUser, isAuthenticated: true });
     return true;
   },
