@@ -15,22 +15,28 @@ export interface BaseTask {
   completed: boolean;
   lastCompleted: string | null;
   associatedStat: keyof CharacterStats;
-  rewards: {
-    health: number;
-    mana: number;
-    experience: number;
-  };
+  streak: number;
+  history: {
+    completedAt: string;
+    streak: number;
+  }[];
 }
 
 export interface Habit extends BaseTask {
   type: 'habit';
-  count: number;
-  positive: boolean;
+  schedule?: {
+    monday: boolean;
+    tuesday: boolean;
+    wednesday: boolean;
+    thursday: boolean;
+    friday: boolean;
+    saturday: boolean;
+    sunday: boolean;
+  };
 }
 
 export interface Daily extends BaseTask {
   type: 'daily';
-  streak: number;
   schedule: {
     monday: boolean;
     tuesday: boolean;

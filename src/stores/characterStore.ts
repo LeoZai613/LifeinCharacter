@@ -37,6 +37,14 @@ export const useCharacterStore = defineStore('character', {
             charisma: 10,
           },
           habits: [],
+          health: {
+            current: 100,
+            max: 100,
+          },
+          mana: {
+            current: 100,
+            max: 100,
+          },
           ...characterData,
         };
       } catch (err) {
@@ -47,13 +55,15 @@ export const useCharacterStore = defineStore('character', {
       }
     },
 
-    async addHabit(habit: Omit<Habit, 'id' | 'completed' | 'streak'>) {
+    async addHabit(habit: Omit<Habit, 'id' | 'completed' | 'streak' | 'history' | 'lastCompleted'>) {
       if (!this.character) return;
       
       const newHabit: Habit = {
         id: crypto.randomUUID(),
         completed: false,
         streak: 0,
+        history: [],
+        lastCompleted: null,
         ...habit,
       };
 
@@ -66,38 +76,98 @@ export const useCharacterStore = defineStore('character', {
       const habit = this.character.habits.find(h => h.id === habitId);
       if (!habit) return;
 
-      habit.completed = true;
-      habit.streak += 1;
+      const now = new Date().toISOString();
+      
+      // Check if this is a new day compared to last completion
+      const isNewDay = !habit.lastCompleted || 
+        new Date(habit.lastCompleted).toDateString() !== new Date(now).toDateString();
 
-      // Calculate experience and stat gains based on difficulty
-      const expGains = {
-        easy: 10,
-        medium: 25,
-        hard: 50,
-      };
+      if (!habit.completed && isNewDay) {
+        habit.completed = true;
+        habit.lastCompleted = now;
+        habit.streak += 1;
+        habit.history.push({
+          completedAt: now,
+          streak: habit.streak
+        });
 
-      const statGains = {
-        easy: 1,
-        medium: 2,
-        hard: 3,
-      };
+        // Calculate experience and stat gains based on difficulty and streak
+        const baseExpGains = {
+          trivial: 5,
+          easy: 10,
+          medium: 25,
+          hard: 50,
+        };
 
-      this.character.experience += expGains[habit.difficulty];
-      this.character.stats[habit.associatedStat] += statGains[habit.difficulty];
+        const baseStatGains = {
+          trivial: 1,
+          easy: 2,
+          medium: 3,
+          hard: 4,
+        };
 
-      // Level up check (simple implementation)
-      const expNeededForNextLevel = this.character.level * 100;
-      if (this.character.experience >= expNeededForNextLevel) {
-        this.character.level += 1;
-        this.character.battleTokens += 1;
+        // Bonus multiplier based on streak
+        const streakMultiplier = Math.min(1 + (habit.streak * 0.1), 2.0); // Max 2x bonus at 10 streak
+
+        const expGain = Math.round(baseExpGains[habit.difficulty] * streakMultiplier);
+        const statGain = Math.round(baseStatGains[habit.difficulty] * streakMultiplier);
+
+        this.character.experience += expGain;
+        this.character.stats[habit.associatedStat] += statGain;
+
+        // Update health and mana
+        const healthGain = Math.round(baseStatGains[habit.difficulty] * streakMultiplier);
+        const manaGain = Math.round(baseStatGains[habit.difficulty] * streakMultiplier);
+
+        this.character.health.current = Math.min(
+          this.character.health.current + healthGain,
+          this.character.health.max
+        );
+        this.character.mana.current = Math.min(
+          this.character.mana.current + manaGain,
+          this.character.mana.max
+        );
+
+        // Level up check with improved rewards
+        const expNeededForNextLevel = this.character.level * 100;
+        if (this.character.experience >= expNeededForNextLevel) {
+          this.character.level += 1;
+          this.character.experience -= expNeededForNextLevel;
+          this.character.battleTokens += this.character.level; // More tokens at higher levels
+          
+          // Increase max health and mana on level up
+          this.character.health.max += 5;
+          this.character.health.current = this.character.health.max;
+          this.character.mana.max += 5;
+          this.character.mana.current = this.character.mana.max;
+        }
       }
     },
 
     resetDailyHabits() {
       if (!this.character) return;
 
+      const now = new Date();
+      const today = now.getDay(); // 0 = Sunday, 1 = Monday, etc.
+      const dayMap = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+
       this.character.habits.forEach(habit => {
-        if (habit.frequency === 'daily') {
+        // Check if the habit should reset based on schedule
+        if (habit.schedule && !habit.schedule[dayMap[today]]) {
+          return; // Skip reset if not scheduled for today
+        }
+
+        // Reset if it's a new day since last completion
+        if (habit.lastCompleted) {
+          const lastCompleted = new Date(habit.lastCompleted);
+          if (lastCompleted.toDateString() !== now.toDateString()) {
+            habit.completed = false;
+            // Break streak if it was missed yesterday
+            if ((now.getTime() - lastCompleted.getTime()) > (24 * 60 * 60 * 1000)) {
+              habit.streak = 0;
+            }
+          }
+        } else {
           habit.completed = false;
         }
       });

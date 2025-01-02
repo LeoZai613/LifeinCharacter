@@ -1,6 +1,5 @@
 import React from 'react';
-import { CharacterSheet } from './components/CharacterSheet';
-import { HabitTracker } from './components/HabitTracker';
+import { CharacterDashboard } from './components/CharacterDashboard';
 import { CharacterQuiz } from './components/CharacterQuiz';
 import { Auth } from './components/Auth';
 import { useUserStore } from './stores/userStore';
@@ -14,11 +13,6 @@ function App() {
 
   const handleQuizComplete = (stats: CharacterStats) => {
     setCharacter(stats);
-  };
-
-  const handleHabitComplete = (habitId: string) => {
-    // TODO: Update habit completion status in user store
-    console.log('Habit completed:', habitId);
   };
 
   return (
@@ -46,13 +40,7 @@ function App() {
             {!user?.character ? (
               <CharacterQuiz onComplete={handleQuizComplete} />
             ) : (
-              <>
-                <CharacterSheet character={user.character} />
-                <HabitTracker 
-                  habits={user.character.habits}
-                  onComplete={handleHabitComplete}
-                />
-              </>
+              <CharacterDashboard />
             )}
           </div>
         </div>
