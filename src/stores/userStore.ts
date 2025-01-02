@@ -2,7 +2,6 @@ import { create } from 'zustand';
 import type { Character, CharacterStats } from '../types/character';
 
 interface User {
-  id: string;
   email: string;
   username: string;
   password: string;
@@ -18,48 +17,73 @@ interface UserStore {
   setCharacter: (stats: CharacterStats) => void;
 }
 
-// Helper function to save state to localStorage
-const saveToStorage = (email: string, data: User) => {
-  localStorage.setItem(`user_${email}`, JSON.stringify(data));
-};
-
-// Helper function to get state from localStorage
-const getFromStorage = (email: string): User | null => {
-  const data = localStorage.getItem(`user_${email}`);
-  return data ? JSON.parse(data) : null;
-};
+const createInitialCharacter = (stats: CharacterStats): Character => ({
+  id: Date.now().toString(),
+  name: 'Adventurer',
+  race: 'Human',
+  class: 'Fighter',
+  level: 1,
+  experience: 0,
+  experienceToNextLevel: 100,
+  health: {
+    current: 50,
+    max: 50,
+  },
+  mana: {
+    current: 30,
+    max: 30,
+  },
+  stats,
+  battleTokens: 0,
+  habits: [],
+  dailies: [],
+  todos: []
+});
 
 export const useUserStore = create<UserStore>((set) => ({
   user: null,
   isAuthenticated: false,
 
   signup: (email: string, password: string, username: string) => {
-    // Check if user already exists
-    const existingUser = getFromStorage(email);
+    // Check if user exists in localStorage
+    const existingUser = localStorage.getItem(email);
     if (existingUser) {
-      return false; // User already exists
+      return false;
     }
 
+    // Create new user
     const newUser = {
-      id: Date.now().toString(),
       email,
       username,
       password,
       character: null
     };
 
-    saveToStorage(email, newUser);
+    // Save to localStorage
+    localStorage.setItem(email, JSON.stringify(newUser));
+    
+    // Update state
     set({ user: newUser, isAuthenticated: true });
     return true;
   },
 
   login: (email: string, password: string) => {
-    const savedUser = getFromStorage(email);
-    if (!savedUser || savedUser.password !== password) {
-      return false; // Invalid credentials
+    // Get user from localStorage
+    const storedUser = localStorage.getItem(email);
+    if (!storedUser) {
+      return false;
     }
 
-    set({ user: savedUser, isAuthenticated: true });
+    // Parse user data
+    const user = JSON.parse(storedUser);
+    
+    // Check password
+    if (user.password !== password) {
+      return false;
+    }
+
+    // Update state
+    set({ user, isAuthenticated: true });
     return true;
   },
 
@@ -73,21 +97,11 @@ export const useUserStore = create<UserStore>((set) => ({
 
       const updatedUser = {
         ...state.user,
-        character: {
-          id: '1',
-          name: 'Adventurer',
-          race: 'Human',
-          class: 'Fighter',
-          level: 1,
-          experience: 0,
-          stats,
-          battleTokens: 0,
-          habits: []
-        }
+        character: createInitialCharacter(stats)
       };
 
       // Save to localStorage
-      saveToStorage(updatedUser.email, updatedUser);
+      localStorage.setItem(updatedUser.email, JSON.stringify(updatedUser));
 
       return { user: updatedUser };
     });
