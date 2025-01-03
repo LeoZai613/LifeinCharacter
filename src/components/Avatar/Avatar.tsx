@@ -71,6 +71,33 @@ export const Avatar: React.FC<AvatarProps> = ({
     return paths[avatar.features.hairStyle as keyof typeof paths] || paths.short;
   };
 
+  // Class-specific colors and details
+  const getClassColors = () => {
+    const colors = {
+      mage: {
+        primary: '#8B5CF6', // Purple for mage robes
+        secondary: '#C4B5FD', // Lighter purple for details
+        accent: '#4C1D95' // Dark purple for shadows
+      },
+      warrior: {
+        primary: '#DC2626', // Red for armor
+        secondary: '#F87171', // Lighter red for highlights
+        accent: '#7F1D1D' // Dark red for shadows
+      },
+      rogue: {
+        primary: '#059669', // Green for leather
+        secondary: '#6EE7B7', // Lighter green for details
+        accent: '#064E3B' // Dark green for shadows
+      },
+      cleric: {
+        primary: '#D97706', // Gold for holy robes
+        secondary: '#FCD34D', // Yellow for holy symbols
+        accent: '#92400E' // Dark gold for shadows
+      }
+    };
+    return colors[avatar.class as keyof typeof colors] || colors.warrior;
+  };
+
   return (
     <div className={`relative ${sizeClasses[size]}`}>
       <svg
@@ -80,18 +107,18 @@ export const Avatar: React.FC<AvatarProps> = ({
           filter: showEffects ? 'drop-shadow(0 0 2px rgba(255,255,255,0.3))' : 'none'
         }}
       >
-        {/* Base circle */}
+        {/* Base circle with class-specific glow */}
         <circle
           cx="50"
           cy="50"
           r="45"
           fill="none"
-          stroke="#4A90E2"
+          stroke={getClassColors().secondary}
           strokeWidth="2"
           className="animate-pulse"
         />
 
-        {/* Body */}
+        {/* Body base */}
         <path
           d={getBodyPath()}
           fill={avatar.colors.skin}
@@ -99,48 +126,146 @@ export const Avatar: React.FC<AvatarProps> = ({
           strokeWidth="1"
         />
 
-        {/* Class-specific details */}
+        {/* Class-specific clothing/armor */}
         {avatar.class && (
-          <path
-            d={getClassSpecificDetails()}
-            fill="none"
-            stroke="#666"
-            strokeWidth="1"
-            opacity="0.5"
-          />
+          <>
+            <path
+              d={getClassSpecificDetails()}
+              fill={getClassColors().primary}
+              stroke={getClassColors().accent}
+              strokeWidth="1"
+            />
+            {/* Class-specific decorative details */}
+            {avatar.class === 'mage' && (
+              <path
+                d="M 40,35 L 60,35 M 45,45 L 55,45"
+                stroke={getClassColors().secondary}
+                strokeWidth="1"
+                fill="none"
+              />
+            )}
+            {avatar.class === 'warrior' && (
+              <path
+                d="M 45,50 L 55,50 M 40,60 L 60,60"
+                stroke={getClassColors().secondary}
+                strokeWidth="2"
+                fill="none"
+              />
+            )}
+            {avatar.class === 'cleric' && (
+              <path
+                d="M 50,40 L 50,60 M 40,50 L 60,50"
+                stroke={getClassColors().secondary}
+                strokeWidth="1"
+                fill="none"
+              />
+            )}
+            {avatar.class === 'rogue' && (
+              <path
+                d="M 40,45 L 60,45 M 42,55 L 58,55"
+                stroke={getClassColors().secondary}
+                strokeWidth="0.5"
+                fill="none"
+              />
+            )}
+          </>
         )}
 
-        {/* Face */}
+        {/* Face with better shading */}
         <path
           d={getFacePath()}
           fill={avatar.colors.skin}
           stroke="#000"
           strokeWidth="1"
         />
+        <path
+          d={getFacePath()}
+          fill="rgba(0,0,0,0.1)"
+          strokeWidth="0"
+          transform="translate(2, 2)"
+        />
 
-        {/* Race-specific features */}
+        {/* Race-specific features with shading */}
         <path
           d={getRaceSpecificFeatures()}
-          fill="none"
+          fill={avatar.colors.skin}
           stroke="#000"
           strokeWidth="1"
         />
+        {avatar.race === 'dwarf' && (
+          <path
+            d="M 35,62 C 45,67 55,67 65,62"
+            fill={avatar.colors.hair}
+            stroke={avatar.colors.hair}
+            strokeWidth="1"
+          />
+        )}
 
-        {/* Hair */}
+        {/* Hair with highlights */}
         <path
           d={getHairPath()}
           fill={avatar.colors.hair}
           stroke="#000"
           strokeWidth="1"
         />
+        <path
+          d={getHairPath()}
+          fill="rgba(255,255,255,0.2)"
+          strokeWidth="0"
+          transform="translate(-1, -1) scale(0.95)"
+        />
 
-        {/* Eyes */}
+        {/* Eyes with shine */}
         <circle cx="45" cy="42" r="2" fill={avatar.colors.eyes} />
         <circle cx="55" cy="42" r="2" fill={avatar.colors.eyes} />
+        <circle cx="44" cy="41" r="0.5" fill="#FFF" />
+        <circle cx="54" cy="41" r="0.5" fill="#FFF" />
+
+        {/* Class-specific effects */}
+        {showEffects && (
+          <g>
+            {avatar.class === 'mage' && (
+              <circle
+                cx="50"
+                cy="50"
+                r="40"
+                fill="none"
+                stroke={getClassColors().secondary}
+                strokeWidth="0.5"
+                opacity="0.5"
+                className="animate-spin"
+              />
+            )}
+            {avatar.class === 'warrior' && (
+              <path
+                d="M 30,30 L 70,70 M 30,70 L 70,30"
+                stroke={getClassColors().secondary}
+                strokeWidth="0.5"
+                opacity="0.3"
+              />
+            )}
+            {avatar.class === 'cleric' && (
+              <circle
+                cx="50"
+                cy="50"
+                r="35"
+                fill="none"
+                stroke={getClassColors().secondary}
+                strokeWidth="0.5"
+                opacity="0.5"
+                strokeDasharray="5,5"
+                className="animate-pulse"
+              />
+            )}
+          </g>
+        )}
       </svg>
 
       {showLevel && (
-        <div className="absolute -bottom-2 -right-2 bg-purple-600 text-white text-xs rounded-full w-6 h-6 flex items-center justify-center">
+        <div 
+          className="absolute -bottom-2 -right-2 text-white text-xs rounded-full w-6 h-6 flex items-center justify-center"
+          style={{ backgroundColor: getClassColors().primary }}
+        >
           {avatar.level}
         </div>
       )}
