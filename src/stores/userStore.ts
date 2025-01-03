@@ -43,7 +43,24 @@ const createInitialCharacter = (stats: CharacterStats): Character => ({
   battleTokens: 0,
   habits: [],
   dailies: [],
-  todos: []
+  todos: [],
+  avatar: {
+    class: 'warrior',
+    race: 'human',
+    gender: 'other',
+    colors: {
+      skin: '#FFD1AA',
+      hair: '#4A3728',
+      eyes: '#2E4B9C',
+    },
+    features: {
+      hairStyle: 'short',
+      faceStyle: 'round',
+      bodyType: 'athletic',
+    },
+    equipment: {},
+    level: 1,
+  }
 });
 
 // Helper function to save user data
@@ -93,42 +110,62 @@ export const useUserStore = create<UserStore>((set, get) => ({
       return false;
     }
 
-    // Migrate old habits to new format
+    // Initialize avatar if it doesn't exist
+    if (!storedUser.character?.avatar) {
+      const characterClass = (storedUser.character?.class || 'Fighter').toLowerCase();
+      const characterRace = (storedUser.character?.race || 'Human').toLowerCase();
+      
+      storedUser.character = {
+        ...storedUser.character,
+        avatar: {
+          // Map Fighter to warrior for compatibility
+          class: characterClass === 'fighter' ? 'warrior' : characterClass,
+          race: characterRace,
+          gender: 'other',
+          colors: {
+            skin: '#FFD1AA',
+            hair: '#4A3728',
+            eyes: '#2E4B9C',
+          },
+          features: {
+            hairStyle: 'short',
+            faceStyle: 'round',
+            bodyType: 'athletic',
+          },
+          equipment: {},
+          level: storedUser.character?.level || 1,
+        }
+      };
+      // Save the updated user data
+      localStorage.setItem(email, JSON.stringify(storedUser));
+    }
+
+    // Migrate old habits to new format if needed
     if (storedUser.character?.habits) {
       storedUser.character.habits = storedUser.character.habits.map(habit => {
         if (!('type' in habit)) {
-          const oldHabit = habit as any;
           return {
-            ...oldHabit,
+            ...habit,
             type: 'habit',
-            count: oldHabit.streak || 0, // Convert streak to count
+            count: (habit as any).streak || 0,
             positive: true,
-            negative: false,
-            completed: undefined, // Remove old fields
-            streak: undefined,
+            negative: false
           };
         }
         return habit;
       });
-
-      // Save migrated data
-      localStorage.setItem(email, JSON.stringify(storedUser));
     }
 
     console.log('Loaded user data:', {
       email: storedUser.email,
       character: {
         stats: storedUser.character?.stats,
-        habits: storedUser.character?.habits.map(h => ({
-          name: h.name,
-          count: h.count,
-          type: h.type,
-          positive: h.positive,
-          negative: h.negative
-        }))
+        habits: storedUser.character?.habits.length,
+        dailies: storedUser.character?.dailies.length,
+        todos: storedUser.character?.todos.length
       }
     });
-    
+
     set({ user: storedUser, isAuthenticated: true });
     return true;
   },

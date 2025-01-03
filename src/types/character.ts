@@ -1,3 +1,5 @@
+import type { AvatarState } from './avatar';
+
 export interface CharacterStats {
   strength: number;
   dexterity: number;
@@ -73,4 +75,5 @@ export interface Character {
   habits: Habit[];
   dailies: Daily[];
   todos: Todo[];
+  avatar?: AvatarState;
 }

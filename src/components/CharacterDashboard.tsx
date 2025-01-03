@@ -1,6 +1,8 @@
 import React, { useMemo, useEffect } from 'react';
 import { useUserStore } from '../stores/userStore';
 import { TaskList } from './TaskList';
+import { Avatar } from './Avatar/Avatar';
+import { AvatarCustomizer } from './Avatar/AvatarCustomizer';
 
 export const CharacterDashboard = () => {
   const { user, addHabit, addDaily, addTodo, completeDaily, completeTodo, toggleHabit } = useUserStore();
@@ -20,83 +22,112 @@ export const CharacterDashboard = () => {
       }
     });
 
-    console.log('Calculating buffs:', {
-      habits: character.habits.map(h => ({
-        name: h.name,
-        count: h.count,
-        stat: h.associatedStat,
-        buffAmount: h.count > 0 ? Math.floor(h.count) : 0
-      })),
-      calculatedBuffs: buffs
-    });
-
+    console.log('Calculating buffs:', { calculatedBuffs: buffs, habits: character.habits });
     return buffs;
   }, [character?.habits]);
 
   if (!character) {
-    return <div className="text-white">Create a character to begin your journey!</div>;
+    return <div>Loading character...</div>;
   }
 
   return (
-    <div className="p-6 space-y-6">
-      {/* Character Stats */}
-      <div className="grid grid-cols-2 gap-4">
-        <div className="bg-gray-800 rounded-lg p-4">
-          <h2 className="text-xl font-bold text-white mb-4">Character Stats</h2>
-          <div className="grid grid-cols-2 gap-4">
-            {Object.entries(character.stats).map(([stat, value]) => (
-              <div key={stat} className="bg-gray-700 p-3 rounded-lg">
-                <div className="text-gray-400 capitalize">{stat}</div>
-                <div className="text-white text-xl">
-                  {value}
-                  {statBuffs[stat as keyof typeof character.stats] && (
-                    <span className="text-green-400 text-sm ml-2">
-                      +{statBuffs[stat as keyof typeof character.stats]}
-                    </span>
-                  )}
+    <div className="container mx-auto p-4 space-y-6">
+      {/* Character Stats Panel */}
+      <div className="bg-gray-800 p-6 rounded-xl shadow-xl text-white">
+        <div className="flex items-start gap-8">
+          {/* Avatar Section */}
+          <div className="flex-shrink-0">
+            {character.avatar && (
+              <Avatar
+                avatar={character.avatar}
+                size="xl"
+                showEffects={true}
+                showLevel={true}
+              />
+            )}
+          </div>
+
+          {/* Stats Section */}
+          <div className="flex-grow">
+            <h2 className="text-3xl font-bold mb-2">{character.name}</h2>
+            <p className="text-gray-400 mb-4">
+              Level {character.level} {character.race} {character.class}
+            </p>
+
+            <div className="grid grid-cols-3 gap-4 mb-4">
+              {Object.entries(character.stats).map(([stat, value]) => {
+                const buff = statBuffs[stat as keyof typeof character.stats] || 0;
+                return (
+                  <div key={stat} className="bg-gray-700 p-3 rounded-lg">
+                    <div className="text-gray-400 text-sm capitalize">{stat}</div>
+                    <div className="text-xl font-bold">
+                      {value}
+                      {buff > 0 && (
+                        <span className="text-green-400 text-sm ml-2">+{buff}</span>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Progress Bars */}
+            <div className="space-y-2">
+              <div>
+                <div className="flex justify-between text-sm mb-1">
+                  <span>Health</span>
+                  <span>{character.health.current}/{character.health.max}</span>
+                </div>
+                <div className="bg-gray-700 rounded-full h-2">
+                  <div
+                    className="bg-red-500 rounded-full h-2"
+                    style={{
+                      width: `${(character.health.current / character.health.max) * 100}%`
+                    }}
+                  />
                 </div>
               </div>
-            ))}
-          </div>
-        </div>
-
-        <div className="bg-gray-800 rounded-lg p-4">
-          <h2 className="text-xl font-bold text-white mb-4">Character Info</h2>
-          <div className="grid grid-cols-2 gap-4">
-            <div className="bg-gray-700 p-3 rounded-lg">
-              <div className="text-gray-400">Level</div>
-              <div className="text-white text-xl">{character.level}</div>
-            </div>
-            <div className="bg-gray-700 p-3 rounded-lg">
-              <div className="text-gray-400">Experience</div>
-              <div className="text-white text-xl">
-                {character.experience} / {character.experienceToNextLevel}
+              <div>
+                <div className="flex justify-between text-sm mb-1">
+                  <span>Mana</span>
+                  <span>{character.mana.current}/{character.mana.max}</span>
+                </div>
+                <div className="bg-gray-700 rounded-full h-2">
+                  <div
+                    className="bg-blue-500 rounded-full h-2"
+                    style={{
+                      width: `${(character.mana.current / character.mana.max) * 100}%`
+                    }}
+                  />
+                </div>
               </div>
-            </div>
-            <div className="bg-gray-700 p-3 rounded-lg">
-              <div className="text-gray-400">Health</div>
-              <div className="text-white text-xl">
-                {character.health.current} / {character.health.max}
-              </div>
-            </div>
-            <div className="bg-gray-700 p-3 rounded-lg">
-              <div className="text-gray-400">Mana</div>
-              <div className="text-white text-xl">
-                {character.mana.current} / {character.mana.max}
+              <div>
+                <div className="flex justify-between text-sm mb-1">
+                  <span>Experience</span>
+                  <span>{character.experience}/{character.experienceToNextLevel}</span>
+                </div>
+                <div className="bg-gray-700 rounded-full h-2">
+                  <div
+                    className="bg-yellow-500 rounded-full h-2"
+                    style={{
+                      width: `${(character.experience / character.experienceToNextLevel) * 100}%`
+                    }}
+                  />
+                </div>
               </div>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Task List */}
+      {/* Avatar Customization */}
+      <AvatarCustomizer />
+
+      {/* Task Lists */}
       <TaskList
         habits={character.habits}
         dailies={character.dailies}
         todos={character.todos}
-        onAddHabit={addHabit}
-        onAddDaily={addDaily}
-        onAddTodo={addTodo}
         onCompleteDaily={completeDaily}
         onCompleteTodo={completeTodo}
         onToggleHabit={toggleHabit}
