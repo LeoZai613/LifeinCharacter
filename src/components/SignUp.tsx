@@ -6,15 +6,24 @@ export const SignUp: React.FC<{ onToggleForm: () => void }> = ({ onToggleForm })
   const [password, setPassword] = useState('');
   const [username, setUsername] = useState('');
   const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
   const signup = useUserStore((state) => state.signup);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    setIsLoading(true);
 
-    const success = signup(email, password, username);
-    if (!success) {
-      setError('An account with this email already exists');
+    try {
+      const success = signup(email, password, username);
+      if (!success) {
+        setError('An account with this email already exists');
+      }
+    } catch (error) {
+      setError('An error occurred during signup');
+      console.error('Signup error:', error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -40,6 +49,7 @@ export const SignUp: React.FC<{ onToggleForm: () => void }> = ({ onToggleForm })
               placeholder="Email address"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
+              disabled={isLoading}
             />
           </div>
           <div>
@@ -55,6 +65,7 @@ export const SignUp: React.FC<{ onToggleForm: () => void }> = ({ onToggleForm })
               placeholder="Username"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
+              disabled={isLoading}
             />
           </div>
           <div>
@@ -70,6 +81,7 @@ export const SignUp: React.FC<{ onToggleForm: () => void }> = ({ onToggleForm })
               placeholder="Password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              disabled={isLoading}
             />
           </div>
         </div>
@@ -81,9 +93,10 @@ export const SignUp: React.FC<{ onToggleForm: () => void }> = ({ onToggleForm })
         <div>
           <button
             type="submit"
-            className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+            className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
+            disabled={isLoading}
           >
-            Sign up
+            {isLoading ? 'Creating account...' : 'Sign up'}
           </button>
         </div>
       </form>
@@ -92,6 +105,7 @@ export const SignUp: React.FC<{ onToggleForm: () => void }> = ({ onToggleForm })
         <button
           onClick={onToggleForm}
           className="text-indigo-600 hover:text-indigo-500"
+          disabled={isLoading}
         >
           Already have an account? Sign in
         </button>

@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import type { Character, CharacterStats, Daily, Habit, Todo, TaskDifficulty } from '../types/character';
+import type { Character, CharacterStats, Daily, Habit, Todo } from '../types/character';
 
 interface User {
   email: string;
@@ -63,20 +63,6 @@ const createInitialCharacter = (stats: CharacterStats): Character => ({
   }
 });
 
-// Helper function to save user data
-const saveUser = (user: User) => {
-  localStorage.setItem(user.email, JSON.stringify(user));
-  console.log('Saved user data:', {
-    email: user.email,
-    character: {
-      stats: user.character?.stats,
-      habits: user.character?.habits.length,
-      dailies: user.character?.dailies.length,
-      todos: user.character?.todos.length
-    }
-  });
-};
-
 export const useUserStore = create<UserStore>((set, get) => ({
   user: null,
   isAuthenticated: false,
@@ -94,7 +80,7 @@ export const useUserStore = create<UserStore>((set, get) => ({
       character: null,
     };
 
-    saveUser(newUser);
+    localStorage.setItem(email, JSON.stringify(newUser));
     set({ user: newUser, isAuthenticated: true });
     return true;
   },
@@ -109,62 +95,6 @@ export const useUserStore = create<UserStore>((set, get) => ({
     if (storedUser.password !== password) {
       return false;
     }
-
-    // Initialize avatar if it doesn't exist
-    if (!storedUser.character?.avatar) {
-      const characterClass = (storedUser.character?.class || 'Fighter').toLowerCase();
-      const characterRace = (storedUser.character?.race || 'Human').toLowerCase();
-      
-      storedUser.character = {
-        ...storedUser.character,
-        avatar: {
-          // Map Fighter to warrior for compatibility
-          class: characterClass === 'fighter' ? 'warrior' : characterClass,
-          race: characterRace,
-          gender: 'other',
-          colors: {
-            skin: '#FFD1AA',
-            hair: '#4A3728',
-            eyes: '#2E4B9C',
-          },
-          features: {
-            hairStyle: 'short',
-            faceStyle: 'round',
-            bodyType: 'athletic',
-          },
-          equipment: {},
-          level: storedUser.character?.level || 1,
-        }
-      };
-      // Save the updated user data
-      localStorage.setItem(email, JSON.stringify(storedUser));
-    }
-
-    // Migrate old habits to new format if needed
-    if (storedUser.character?.habits) {
-      storedUser.character.habits = storedUser.character.habits.map(habit => {
-        if (!('type' in habit)) {
-          return {
-            ...habit,
-            type: 'habit',
-            count: (habit as any).streak || 0,
-            positive: true,
-            negative: false
-          };
-        }
-        return habit;
-      });
-    }
-
-    console.log('Loaded user data:', {
-      email: storedUser.email,
-      character: {
-        stats: storedUser.character?.stats,
-        habits: storedUser.character?.habits.length,
-        dailies: storedUser.character?.dailies.length,
-        todos: storedUser.character?.todos.length
-      }
-    });
 
     set({ user: storedUser, isAuthenticated: true });
     return true;
@@ -183,7 +113,7 @@ export const useUserStore = create<UserStore>((set, get) => ({
       character: createInitialCharacter(stats),
     };
 
-    saveUser(updatedUser);
+    localStorage.setItem(updatedUser.email, JSON.stringify(updatedUser));
     set({ user: updatedUser });
   },
 
@@ -191,9 +121,9 @@ export const useUserStore = create<UserStore>((set, get) => ({
     const state = get();
     if (!state.user?.character) return;
 
-    const newHabit: Habit = {
+    const newHabit = {
       id: Date.now().toString(),
-      type: 'habit',
+      type: 'habit' as const,
       count: 0,
       ...habit,
     };
@@ -206,7 +136,7 @@ export const useUserStore = create<UserStore>((set, get) => ({
       },
     };
 
-    saveUser(updatedUser);
+    localStorage.setItem(updatedUser.email, JSON.stringify(updatedUser));
     set({ user: updatedUser });
   },
 
@@ -214,9 +144,9 @@ export const useUserStore = create<UserStore>((set, get) => ({
     const state = get();
     if (!state.user?.character) return;
 
-    const newDaily: Daily = {
+    const newDaily = {
       id: Date.now().toString(),
-      type: 'daily',
+      type: 'daily' as const,
       completed: false,
       streak: 0,
       ...daily,
@@ -230,7 +160,7 @@ export const useUserStore = create<UserStore>((set, get) => ({
       },
     };
 
-    saveUser(updatedUser);
+    localStorage.setItem(updatedUser.email, JSON.stringify(updatedUser));
     set({ user: updatedUser });
   },
 
@@ -238,9 +168,9 @@ export const useUserStore = create<UserStore>((set, get) => ({
     const state = get();
     if (!state.user?.character) return;
 
-    const newTodo: Todo = {
+    const newTodo = {
       id: Date.now().toString(),
-      type: 'todo',
+      type: 'todo' as const,
       completed: false,
       ...todo,
     };
@@ -253,7 +183,7 @@ export const useUserStore = create<UserStore>((set, get) => ({
       },
     };
 
-    saveUser(updatedUser);
+    localStorage.setItem(updatedUser.email, JSON.stringify(updatedUser));
     set({ user: updatedUser });
   },
 
@@ -261,27 +191,19 @@ export const useUserStore = create<UserStore>((set, get) => ({
     const state = get();
     if (!state.user?.character) return;
 
-    const daily = state.user.character.dailies.find(d => d.id === dailyId);
-    if (!daily || daily.completed) return;
-
     const updatedUser = {
       ...state.user,
       character: {
         ...state.user.character,
-        dailies: state.user.character.dailies.map(d =>
-          d.id === dailyId
-            ? { 
-                ...d, 
-                completed: true,
-                streak: d.streak + 1,
-              }
-            : d
+        dailies: state.user.character.dailies.map(daily =>
+          daily.id === dailyId
+            ? { ...daily, completed: true, streak: daily.streak + 1 }
+            : daily
         ),
-        experience: state.user.character.experience + 10,
       },
     };
 
-    saveUser(updatedUser);
+    localStorage.setItem(updatedUser.email, JSON.stringify(updatedUser));
     set({ user: updatedUser });
   },
 
@@ -289,23 +211,17 @@ export const useUserStore = create<UserStore>((set, get) => ({
     const state = get();
     if (!state.user?.character) return;
 
-    const todo = state.user.character.todos.find(t => t.id === todoId);
-    if (!todo || todo.completed) return;
-
     const updatedUser = {
       ...state.user,
       character: {
         ...state.user.character,
-        todos: state.user.character.todos.map(t =>
-          t.id === todoId
-            ? { ...t, completed: true }
-            : t
+        todos: state.user.character.todos.map(todo =>
+          todo.id === todoId ? { ...todo, completed: true } : todo
         ),
-        experience: state.user.character.experience + 15, // More XP for todos
       },
     };
 
-    saveUser(updatedUser);
+    localStorage.setItem(updatedUser.email, JSON.stringify(updatedUser));
     set({ user: updatedUser });
   },
 
@@ -313,23 +229,17 @@ export const useUserStore = create<UserStore>((set, get) => ({
     const state = get();
     if (!state.user?.character) return;
 
-    const habit = state.user.character.habits.find(h => h.id === habitId);
-    if (!habit) return;
-
     const updatedUser = {
       ...state.user,
       character: {
         ...state.user.character,
-        habits: state.user.character.habits.map(h =>
-          h.id === habitId
-            ? { ...h, count: h.count + (positive ? 1 : -1) }
-            : h
+        habits: state.user.character.habits.map(habit =>
+          habit.id === habitId ? { ...habit, count: habit.count + 1 } : habit
         ),
-        experience: state.user.character.experience + (positive ? 5 : -5),
       },
     };
 
-    saveUser(updatedUser);
+    localStorage.setItem(updatedUser.email, JSON.stringify(updatedUser));
     set({ user: updatedUser });
   },
 }));
