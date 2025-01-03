@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import type { Character, CharacterStats, Daily, Habit, Todo } from '../types/character';
+import type { AvatarState } from '../types/avatar';
 
 interface User {
   email: string;
@@ -15,6 +16,7 @@ interface UserStore {
   signup: (email: string, password: string, username: string) => boolean;
   logout: () => void;
   setCharacter: (stats: CharacterStats) => void;
+  updateCharacterAvatar: (avatar: AvatarState) => void;
   addHabit: (habit: Omit<Habit, 'id' | 'type' | 'count'>) => void;
   addDaily: (daily: Omit<Daily, 'id' | 'type' | 'completed' | 'streak'>) => void;
   addTodo: (todo: Omit<Todo, 'id' | 'type' | 'completed'>) => void;
@@ -111,6 +113,22 @@ export const useUserStore = create<UserStore>((set, get) => ({
     const updatedUser = {
       ...state.user,
       character: createInitialCharacter(stats),
+    };
+
+    localStorage.setItem(updatedUser.email, JSON.stringify(updatedUser));
+    set({ user: updatedUser });
+  },
+
+  updateCharacterAvatar: (avatar: AvatarState) => {
+    const state = get();
+    if (!state.user?.character) return;
+
+    const updatedUser = {
+      ...state.user,
+      character: {
+        ...state.user.character,
+        avatar,
+      },
     };
 
     localStorage.setItem(updatedUser.email, JSON.stringify(updatedUser));

@@ -1,4 +1,4 @@
-import React, { useMemo, useEffect, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useUserStore } from '../stores/userStore';
 import { TaskList } from './TaskList';
 import { Avatar } from './Avatar/Avatar';
@@ -48,14 +48,17 @@ export const CharacterDashboard = () => {
                   Customize
                 </button>
               </div>
-              {character.avatar && (
-                <Avatar
-                  avatar={character.avatar}
-                  size="xl"
-                  showEffects={true}
-                  showLevel={true}
-                />
-              )}
+              {/* Avatar Display */}
+              <div className="flex justify-center">
+                {character?.avatar && (
+                  <Avatar
+                    avatar={character.avatar}
+                    size="xl"
+                    showEffects={true}
+                    showLevel={true}
+                  />
+                )}
+              </div>
             </div>
           </div>
 

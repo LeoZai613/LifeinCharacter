@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAvatarStore } from '../../stores/avatarStore';
+import { useUserStore } from '../../stores/userStore';
 import { Avatar } from './Avatar';
 import logger from '../../utils/logger';
 import type { AvatarCustomizationProps, AvatarState } from '../../types/avatar';
@@ -7,6 +8,7 @@ import type { AvatarCustomizationProps, AvatarState } from '../../types/avatar';
 const AvatarCustomization: React.FC<AvatarCustomizationProps> = ({ userId = '1', onClose }) => {
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [showSuccess, setShowSuccess] = useState<boolean>(false);
+  const { updateCharacterAvatar } = useUserStore();
   const avatar = useAvatarStore();
   const { updateFeatures, updateRace, updateClass, updateColors, saveAvatar } = useAvatarStore();
 
@@ -18,41 +20,28 @@ const AvatarCustomization: React.FC<AvatarCustomizationProps> = ({ userId = '1',
     });
   }, [userId, avatar]);
 
-  const handleSaveChanges = async (event: React.MouseEvent<HTMLButtonElement>) => {
-    event.preventDefault();
-    const startTime = performance.now();
-    
-    logger.group('Avatar Save Operation', (log) => {
-      log('debug', 'Save initiated', {
-        buttonDetails: {
-          id: event.currentTarget.id,
-          className: event.currentTarget.className,
-          disabled: event.currentTarget.disabled,
-        },
-        avatarState: avatar
-      });
-    });
-
-    setIsSaving(true);
-    
+  const handleSave = async () => {
     try {
+      setIsSaving(true);
       await saveAvatar();
-      logger.info('Avatar saved successfully', {
-        duration: `${performance.now() - startTime}ms`,
-        avatarState: avatar
-      });
+      
+      // Update character avatar in user store
+      updateCharacterAvatar(avatar);
+      
+      // Show success message
       setShowSuccess(true);
+      
+      // Close after delay
       setTimeout(() => {
+        setShowSuccess(false);
         if (onClose) {
           onClose();
         }
-      }, 1500); // Show success message for 1.5 seconds before closing
+      }, 1500);
+      
     } catch (error) {
-      logger.error('Failed to save avatar', {
-        error: error instanceof Error ? error.message : 'Unknown error',
-        stack: error instanceof Error ? error.stack : undefined,
-        duration: `${performance.now() - startTime}ms`
-      });
+      console.error('Error saving avatar:', error);
+      // setError('Failed to save avatar changes');
     } finally {
       setIsSaving(false);
     }
@@ -195,7 +184,7 @@ const AvatarCustomization: React.FC<AvatarCustomizationProps> = ({ userId = '1',
 
           {/* Save Button */}
           <button
-            onClick={handleSaveChanges}
+            onClick={handleSave}
             className="w-full mt-6 py-2 px-4 bg-purple-600 text-white rounded-md hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed"
             disabled={isSaving}
             type="button"
