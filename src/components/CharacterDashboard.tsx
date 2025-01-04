@@ -1,13 +1,24 @@
 import React, { useMemo, useState } from 'react';
 import { useUserStore } from '../stores/userStore';
+import { useDebugCharacterStore } from '../stores/debugCharacterStore';
 import { TaskList } from './TaskList';
 import { Avatar } from './Avatar/Avatar';
 import AvatarCustomization from './Avatar/AvatarCustomization';
+import { DebugControls } from './DebugControls';
 
 export const CharacterDashboard = () => {
-  const { user, addHabit, addDaily, addTodo, completeDaily, completeTodo, toggleHabit } = useUserStore();
   const [showCustomization, setShowCustomization] = useState(false);
-  const character = user?.character;
+  const debugStore = useDebugCharacterStore();
+  const userStore = useUserStore();
+
+  // Use debug store if in debug mode, otherwise use user store
+  const isDebugMode = debugStore.isDebugMode;
+  const character = isDebugMode ? debugStore.character : userStore.user?.character;
+
+  const handleAddHabit = isDebugMode ? debugStore.addHabit : userStore.addHabit;
+  const handleAddDaily = isDebugMode ? debugStore.addDaily : userStore.addDaily;
+  const handleCompleteDaily = isDebugMode ? debugStore.completeDaily : userStore.completeDaily;
+  const handleToggleHabit = isDebugMode ? debugStore.toggleHabit : userStore.toggleHabit;
 
   // Calculate stat buffs from habit streaks
   const statBuffs = useMemo(() => {
@@ -33,6 +44,8 @@ export const CharacterDashboard = () => {
 
   return (
     <div className="container mx-auto p-4 space-y-6">
+      {isDebugMode && <DebugControls />}
+      
       {/* Character Stats Panel */}
       <div className="bg-gray-800 p-6 rounded-xl shadow-xl text-white">
         <div className="flex items-start gap-8">
@@ -140,7 +153,7 @@ export const CharacterDashboard = () => {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="max-w-4xl w-full mx-4">
             <AvatarCustomization 
-              userId={user?.id} 
+              userId={userStore.user?.id} 
               onClose={() => setShowCustomization(false)} 
             />
           </div>
@@ -152,9 +165,9 @@ export const CharacterDashboard = () => {
         habits={character.habits}
         dailies={character.dailies}
         todos={character.todos}
-        onCompleteDaily={completeDaily}
-        onCompleteTodo={completeTodo}
-        onToggleHabit={toggleHabit}
+        onCompleteDaily={handleCompleteDaily}
+        onCompleteTodo={handleToggleHabit}
+        onToggleHabit={handleToggleHabit}
       />
     </div>
   );
