@@ -280,16 +280,6 @@ export const Avatar: React.FC<AvatarProps> = ({
     return paths[avatar.class as keyof typeof paths] || paths.warrior;
   };
 
-  const getClassSpecificDetails = () => {
-    const details = {
-      mage: 'M 30,30 C 30,20 70,20 70,30 L 65,85 C 65,85 55,90 45,90 C 35,90 35,85 35,85 Z', // Robe
-      warrior: 'M 35,40 L 65,40 L 60,80 L 40,80 Z', // Armor plate
-      rogue: 'M 40,30 L 60,30 L 65,80 L 35,80 Z', // Light armor
-      cleric: 'M 35,30 C 35,25 65,25 65,30 L 60,85 C 60,85 50,90 40,90 Z' // Holy robes
-    };
-    return details[avatar.class as keyof typeof details];
-  };
-
   const getFacePath = () => {
     const paths = {
       round: 'M 40,35 C 40,30 60,30 60,35 C 60,45 55,55 50,55 C 45,55 40,45 40,35',
@@ -301,10 +291,10 @@ export const Avatar: React.FC<AvatarProps> = ({
 
   const getRaceSpecificFeatures = () => {
     const features = {
-      elf: 'M 35,35 L 30,25 L 45,35 M 55,35 L 70,25 L 65,35', // Pointed ears
-      dwarf: 'M 30,60 C 45,65 55,65 70,60', // Beard base
-      orc: 'M 45,45 L 55,45 L 50,50 Z', // Tusks
-      human: '' // No special features
+      human: '',
+      elf: 'M 35,35 L 30,25 L 45,35 M 55,35 L 70,25 L 65,35',
+      dwarf: 'M 35,35 C 35,25 45,15 50,15 C 55,15 65,25 65,35',
+      orc: 'M 35,35 L 40,25 L 45,35 M 55,35 L 60,25 L 65,35'
     };
     return features[avatar.race as keyof typeof features] || features.human;
   };
@@ -538,7 +528,7 @@ export const Avatar: React.FC<AvatarProps> = ({
         />
 
         <path
-          d="M 35,35 L 30,25 L 45,35 M 55,35 L 70,25 L 65,35"
+          d={getRaceSpecificFeatures()}
           fill="#FFD1AA"
           stroke="#000"
           strokeWidth="1"
