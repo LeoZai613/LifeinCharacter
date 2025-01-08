@@ -28,123 +28,102 @@ export const Avatar: React.FC<AvatarProps> = ({
     const paths = {
       slim: `
         M 50,15 
-        C 45,15 42,16 40,18
-        L 38,22
-        C 36,25 35,28 34,32
-        L 33,65
-        C 33,72 35,75 38,77
-        L 42,80
-        C 45,82 48,83 50,83
-        C 52,83 55,82 58,80
-        L 62,77
-        C 65,75 67,72 67,65
-        L 66,32
-        C 65,28 64,25 62,22
-        L 60,18
-        C 58,16 55,15 50,15
+        C 42,15 35,20 33,30
+        L 32,45
+        C 31,55 31,65 32,75
+        L 33,85
+        C 35,95 42,100 50,100
+        C 58,100 65,95 67,85
+        L 68,75
+        C 69,65 69,55 68,45
+        L 67,30
+        C 65,20 58,15 50,15
         Z
 
-        M 34,32
-        C 34,32 30,35 28,42
+        M 33,30
+        C 33,30 30,35 29,42
+        C 28,45 28,48 29,51
+        C 30,54 32,56 34,56
+        L 35,52
+        M 67,30
+        C 67,30 70,35 71,42
+        C 72,45 72,48 71,51
+        C 70,54 68,56 66,56
+        L 65,52
+
+        M 33,85
+        C 33,85 35,90 38,95
+        L 40,100
+        C 42,105 45,110 50,110
+        C 55,110 58,105 60,100
+        L 62,95
+        C 65,90 67,85 67,85
+      `,
+      muscular: `
+        M 50,15
+        C 40,15 32,20 30,30
+        L 29,45
+        C 28,55 28,65 29,75
+        L 30,85
+        C 32,95 40,100 50,100
+        C 60,100 68,95 70,85
+        L 71,75
+        C 72,65 72,55 71,45
+        L 70,30
+        C 68,20 60,15 50,15
+        Z
+
+        M 30,30
+        C 30,30 27,35 26,42
+        C 25,45 25,48 26,51
+        C 27,54 29,56 31,56
+        L 32,52
+        M 70,30
+        C 70,30 73,35 74,42
+        C 75,45 75,48 74,51
+        C 73,54 71,56 69,56
+        L 68,52
+
+        M 30,85
+        C 30,85 32,90 35,95
+        L 37,100
+        C 40,105 45,110 50,110
+        C 55,110 60,105 63,100
+        L 65,95
+        C 68,90 70,85 70,85
+      `,
+      athletic: `
+        M 50,15
+        C 41,15 34,20 32,30
+        L 31,45
+        C 30,55 30,65 31,75
+        L 32,85
+        C 34,95 41,100 50,100
+        C 59,100 66,95 68,85
+        L 69,75
+        C 70,65 70,55 69,45
+        L 68,30
+        C 66,20 59,15 50,15
+        Z
+
+        M 32,30
+        C 32,30 29,35 28,42
         C 27,45 27,48 28,51
         C 29,54 31,56 33,56
         L 34,52
-        M 66,32
-        C 66,32 70,35 72,42
+        M 68,30
+        C 68,30 71,35 72,42
         C 73,45 73,48 72,51
         C 71,54 69,56 67,56
         L 66,52
 
-        M 38,77
-        C 38,77 38,82 37,85
-        L 36,90
-        C 35,95 34,98 33,102
-        C 32,105 31,108 30,110
-        M 62,77
-        C 62,77 62,82 63,85
-        L 64,90
-        C 65,95 66,98 67,102
-        C 68,105 69,108 70,110
-      `,
-      muscular: `
-        M 50,15
-        C 44,15 40,16 37,19
-        L 34,23
-        C 31,26 29,30 28,35
-        L 27,65
-        C 27,73 30,77 35,79
-        L 42,82
-        C 45,83 48,84 50,84
-        C 52,84 55,83 58,82
-        L 65,79
-        C 70,77 73,73 73,65
-        L 72,35
-        C 71,30 69,26 66,23
-        L 63,19
-        C 60,16 56,15 50,15
-        Z
-
-        M 28,35
-        C 28,35 24,38 22,45
-        C 21,48 21,51 22,54
-        C 23,57 25,59 27,59
-        L 28,55
-        M 72,35
-        C 72,35 76,38 78,45
-        C 79,48 79,51 78,54
-        C 77,57 75,59 73,59
-        L 72,55
-
-        M 35,79
-        C 35,79 35,84 34,87
-        L 33,92
-        C 32,97 31,100 30,104
-        C 29,107 28,110 27,112
-        M 65,79
-        C 65,79 65,84 66,87
-        L 67,92
-        C 68,97 69,100 70,104
-        C 71,107 72,110 73,112
-      `,
-      athletic: `
-        M 50,15
-        C 45,15 41,16 38,19
-        L 35,23
-        C 33,26 31,30 30,35
-        L 29,65
-        C 29,72 32,76 36,78
-        L 42,81
-        C 45,82 48,83 50,83
-        C 52,83 55,82 58,81
-        L 64,78
-        C 68,76 71,72 71,65
-        L 70,35
-        C 69,30 67,26 65,23
-        L 62,19
-        C 59,16 55,15 50,15
-        Z
-
-        M 30,35
-        C 30,35 26,38 24,45
-        C 23,48 23,51 24,54
-        C 25,57 27,59 29,59
-        L 30,55
-        M 70,35
-        C 70,35 74,38 76,45
-        C 77,48 77,51 76,54
-        C 75,57 73,59 71,59
-        L 70,55
-
-        M 36,78
-        C 36,78 36,83 35,86
-        L 34,91
-        C 33,96 32,99 31,103
-        C 30,106 29,109 28,111
-        M 64,78
-        C 64,78 64,83 65,86
-        L 66,91
-        C 67,96 68,99 69,103
-        C 70,106 71,109 72,111
+        M 32,85
+        C 32,85 34,90 37,95
+        L 39,100
+        C 42,105 46,110 50,110
+        C 54,110 58,105 61,100
+        L 63,95
+        C 66,90 68,85 68,85
       `
     };
     return paths[avatar.features.bodyType as keyof typeof paths] || paths.athletic;
@@ -342,73 +321,75 @@ export const Avatar: React.FC<AvatarProps> = ({
   const getDefaultClothing = () => {
     const clothes = {
       warrior: `
-        M 35,40 L 65,40
-        C 63,45 62,50 62,55
-        L 38,55
-        C 38,50 37,45 35,40
+        M 32,35 
+        C 32,45 33,55 35,65
+        L 65,65
+        C 67,55 68,45 68,35
+        L 32,35
         Z
-        M 38,55
-        C 38,65 39,75 40,85
-        L 60,85
-        C 61,75 62,65 62,55
+        M 35,65
+        C 35,75 36,85 38,95
+        L 62,95
+        C 64,85 65,75 65,65
         Z
-        M 40,85
-        C 39,90 38,95 37,100
-        L 63,100
-        C 62,95 61,90 60,85
+        M 38,95
+        C 38,100 40,105 42,110
+        L 58,110
+        C 60,105 62,100 62,95
         Z
       `,
       mage: `
-        M 35,35
-        C 35,40 36,45 38,50
-        L 62,50
-        C 64,45 65,40 65,35
-        L 35,35
+        M 30,30
+        C 30,40 32,50 35,60
+        L 65,60
+        C 68,50 70,40 70,30
+        L 30,30
         Z
-        M 38,50
-        C 37,60 36,70 35,80
-        L 65,80
-        C 64,70 63,60 62,50
+        M 35,60
+        C 33,70 31,80 30,90
+        L 70,90
+        C 69,80 67,70 65,60
         Z
-        M 35,80
-        L 33,110
-        L 67,110
-        L 65,80
+        M 30,90
+        C 29,100 28,110 27,120
+        L 73,120
+        C 72,110 71,100 70,90
         Z
       `,
       rogue: `
-        M 35,35 L 65,35
-        C 64,40 63,45 62,50
-        L 38,50
-        C 37,45 36,40 35,35
+        M 32,35
+        C 32,45 33,55 35,65
+        L 65,65
+        C 67,55 68,45 68,35
+        L 32,35
         Z
-        M 38,50
-        C 37,60 36,70 35,80
-        L 65,80
-        C 64,70 63,60 62,50
+        M 35,65
+        C 34,75 33,85 32,95
+        L 68,95
+        C 67,85 66,75 65,65
         Z
-        M 35,80
-        C 34,90 33,100 32,110
-        L 68,110
-        C 67,100 66,90 65,80
+        M 32,95
+        C 31,105 30,115 29,125
+        L 71,125
+        C 70,115 69,105 68,95
         Z
       `,
       cleric: `
-        M 35,35
-        C 35,40 36,45 38,50
-        L 62,50
-        C 64,45 65,40 65,35
-        L 35,35
+        M 32,35
+        C 32,45 33,55 35,65
+        L 65,65
+        C 67,55 68,45 68,35
+        L 32,35
         Z
-        M 38,50
-        C 37,60 36,70 35,80
-        L 65,80
-        C 64,70 63,60 62,50
+        M 35,65
+        C 34,75 33,85 32,95
+        L 68,95
+        C 67,85 66,75 65,65
         Z
-        M 35,80
-        C 34,90 33,100 32,110
-        L 68,110
-        C 67,100 66,90 65,80
+        M 32,95
+        C 31,105 30,115 29,125
+        L 71,125
+        C 70,115 69,105 68,95
         Z
         M 48,40 L 52,40
         M 50,38 L 50,42
@@ -445,71 +426,44 @@ export const Avatar: React.FC<AvatarProps> = ({
 
   return (
     <div className={`relative ${sizeClasses[size]}`}>
-      <svg
-        viewBox="0 0 100 100"
-        className={`w-full h-full ${showEffects ? 'animate-float' : ''}`}
-        style={{
-          filter: showEffects ? 'drop-shadow(0 0 4px rgba(255,255,255,0.5))' : 'none'
-        }}
+      <svg 
+        viewBox="0 0 100 100" 
+        className="w-full h-full animate-float"
+        style={{ filter: 'drop-shadow(0 0 4px rgba(255,255,255,0.5))' }}
       >
         <defs>
           <radialGradient id="auraGradient" cx="50%" cy="50%" r="50%">
-            <stop offset="0%" stopColor={getClassColors().secondary} stopOpacity="0.4" />
-            <stop offset="100%" stopColor={getClassColors().secondary} stopOpacity="0" />
+            <stop offset="0%" stopColor="#F87171" stopOpacity="0.4" />
+            <stop offset="100%" stopColor="#F87171" stopOpacity="0" />
           </radialGradient>
           <filter id="glowFilter">
-            <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
+            <feGaussianBlur stdDeviation="2" result="coloredBlur" />
             <feMerge>
-              <feMergeNode in="coloredBlur"/>
-              <feMergeNode in="SourceGraphic"/>
+              <feMergeNode in="coloredBlur" />
+              <feMergeNode in="SourceGraphic" />
             </feMerge>
           </filter>
         </defs>
 
-        {/* Background aura effect */}
-        {showEffects && (
-          <circle
-            cx="50"
-            cy="50"
-            r="45"
-            fill="url(#auraGradient)"
-            className="animate-glow"
-          />
-        )}
+        <circle 
+          cx="50" 
+          cy="50" 
+          r="45" 
+          fill="url(#auraGradient)" 
+          className="animate-glow"
+        />
 
-        {/* Body base with improved shading and limbs */}
         <g>
-          {/* Shadow layer */}
           <path
             d={getBodyPath()}
             fill="rgba(0,0,0,0.2)"
             strokeWidth="0"
             transform="translate(2, 2)"
           />
-          
-          {/* Base body */}
-          <path
-            d={getBodyPath()}
-            fill={avatar.colors.skin}
-            stroke="#000"
-            strokeWidth="1"
-          />
-          
-          {/* Highlight layer */}
-          <path
-            d={getBodyPath()}
-            fill="rgba(255,255,255,0.1)"
-            strokeWidth="0"
-            transform="translate(-1, -1) scale(0.98)"
-          />
-
-          {/* Enhanced muscle definition and anatomical details */}
-          <circle cx="34" cy="32" r="2" fill="rgba(0,0,0,0.1)" /> {/* Left shoulder */}
-          <circle cx="66" cy="32" r="2" fill="rgba(0,0,0,0.1)" /> {/* Right shoulder */}
-          <circle cx="38" cy="77" r="2" fill="rgba(0,0,0,0.1)" /> {/* Left hip */}
-          <circle cx="62" cy="77" r="2" fill="rgba(0,0,0,0.1)" /> {/* Right hip */}
-          
-          {/* Muscle definition lines */}
+          <circle cx="34" cy="32" r="2" fill="rgba(0,0,0,0.1)" />
+          <circle cx="66" cy="32" r="2" fill="rgba(0,0,0,0.1)" />
+          <circle cx="38" cy="77" r="2" fill="rgba(0,0,0,0.1)" />
+          <circle cx="62" cy="77" r="2" fill="rgba(0,0,0,0.1)" />
           <path
             d={`
               M 36,42 C 34,45 34,49 36,52
@@ -527,162 +481,55 @@ export const Avatar: React.FC<AvatarProps> = ({
           />
         </g>
 
-        {/* Class-specific armor with details */}
-        {avatar.class && (
+        <g>
           <g>
-            {/* Armor base */}
             <path
-              d={getArmorPath()}
-              fill={getClassColors().primary}
-              stroke={getClassColors().accent}
-              strokeWidth="1"
-              className={showEffects ? 'animate-pulse-slow' : ''}
+              d="M 45,50 L 55,50 M 40,60 L 60,60"
+              stroke="#F87171"
+              strokeWidth="2"
+              fill="none"
             />
-            
-            {/* Armor highlights */}
             <path
-              d={getArmorPath()}
-              fill="rgba(255,255,255,0.1)"
-              strokeWidth="0"
-              transform="translate(-0.5, -0.5) scale(0.99)"
+              d="M 30,30 L 70,70 M 30,70 L 70,30"
+              stroke="#F87171"
+              strokeWidth="0.5"
+              opacity="0.4"
+              className="animate-pulse-slow"
             />
-            
-            {/* Class-specific decorative elements */}
-            {avatar.class === 'mage' && (
-              <g className="animate-sparkle">
-                <path
-                  d="M 40,35 L 60,35 M 45,45 L 55,45"
-                  stroke={getClassColors().secondary}
-                  strokeWidth="1"
-                  fill="none"
-                  filter="url(#glowFilter)"
-                />
-                <circle
-                  cx="50"
-                  cy="50"
-                  r="35"
-                  fill="none"
-                  stroke={getClassColors().secondary}
-                  strokeWidth="0.5"
-                  opacity="0.6"
-                  className="animate-spin-slow"
-                />
-              </g>
-            )}
-            {avatar.class === 'warrior' && (
-              <g>
-                <path
-                  d="M 45,50 L 55,50 M 40,60 L 60,60"
-                  stroke={getClassColors().secondary}
-                  strokeWidth="2"
-                  fill="none"
-                />
-                <path
-                  d="M 30,30 L 70,70 M 30,70 L 70,30"
-                  stroke={getClassColors().secondary}
-                  strokeWidth="0.5"
-                  opacity="0.4"
-                  className="animate-pulse-slow"
-                />
-              </g>
-            )}
-            {avatar.class === 'cleric' && (
-              <g className="animate-glow">
-                <path
-                  d="M 50,40 L 50,60 M 40,50 L 60,50"
-                  stroke={getClassColors().secondary}
-                  strokeWidth="1"
-                  fill="none"
-                  filter="url(#glowFilter)"
-                />
-                <circle
-                  cx="50"
-                  cy="50"
-                  r="35"
-                  fill="none"
-                  stroke={getClassColors().secondary}
-                  strokeWidth="0.5"
-                  opacity="0.5"
-                  strokeDasharray="5,5"
-                  className="animate-spin-slow"
-                />
-              </g>
-            )}
-            {avatar.class === 'rogue' && (
-              <g>
-                <path
-                  d="M 40,45 L 60,45 M 42,55 L 58,55"
-                  stroke={getClassColors().secondary}
-                  strokeWidth="0.5"
-                  fill="none"
-                />
-                <circle
-                  cx="50"
-                  cy="50"
-                  r="35"
-                  fill="none"
-                  stroke={getClassColors().secondary}
-                  strokeWidth="0.3"
-                  opacity="0.3"
-                  strokeDasharray="2,8"
-                  className="animate-spin-slow"
-                />
-              </g>
-            )}
           </g>
-        )}
+        </g>
 
-        {/* Default clothing based on class */}
         <path
           d={getDefaultClothing()}
-          fill={`rgba(${avatar.class === 'warrior' ? '139,69,19' : 
-                      avatar.class === 'mage' ? '70,130,180' :
-                      avatar.class === 'rogue' ? '47,79,79' :
-                      '72,61,139'}, 0.8)`}
+          fill="rgba(139,69,19, 0.8)"
           stroke="#000"
           strokeWidth="1"
         />
 
-        {/* Class-specific clothing details */}
         <path
           d={`
-            ${avatar.class === 'warrior' ? `
-              M 40,45 L 60,45
-              M 42,50 L 58,50
-              M 44,90 L 56,90
-            ` : avatar.class === 'mage' ? `
-              M 40,40 L 60,40
-              M 38,70 L 62,70
-              M 36,100 L 64,100
-            ` : avatar.class === 'rogue' ? `
-              M 40,40 L 60,40
-              M 42,60 L 58,60
-              M 44,80 L 56,80
-            ` : `
-              M 45,45 L 55,45
-              M 50,40 L 50,50
-              M 40,60 L 60,60
-            `}
+            M 40,45 L 60,45
+            M 42,50 L 58,50
+            M 44,90 L 56,90
           `}
           stroke="rgba(0,0,0,0.3)"
           strokeWidth="1"
           fill="none"
         />
 
-        {/* Face with enhanced expressions */}
         <path
           d={getFacePath()}
-          fill={avatar.colors.skin}
+          fill="#FFD1AA"
           stroke="#000"
           strokeWidth="1"
         />
-        {/* Cheeks */}
+
         <path
           d="M 43,43 C 43,41 45,41 45,43 M 55,43 C 55,41 57,41 57,43"
           fill="rgba(255,150,150,0.3)"
           stroke="none"
         />
-        {/* Mouth */}
+
         <path
           d="M 46,46 C 48,48 52,48 54,46"
           stroke="#000"
@@ -690,65 +537,45 @@ export const Avatar: React.FC<AvatarProps> = ({
           fill="none"
         />
 
-        {/* Race-specific features */}
         <path
-          d={getRaceSpecificFeatures()}
-          fill={avatar.colors.skin}
+          d="M 35,35 L 30,25 L 45,35 M 55,35 L 70,25 L 65,35"
+          fill="#FFD1AA"
           stroke="#000"
           strokeWidth="1"
         />
 
-        {/* Hair with improved styling and highlights */}
         <g>
           <path
-            d={getHairPath()}
-            fill={avatar.colors.hair}
+            d="M 35,30 C 35,20 65,20 65,30"
+            fill="#4A3728"
             stroke="#000"
             strokeWidth="1"
           />
           <path
-            d={getHairPath()}
+            d="M 35,30 C 35,20 65,20 65,30"
             fill="rgba(255,255,255,0.2)"
             strokeWidth="0"
             transform="translate(-1, -1) scale(0.95)"
           />
         </g>
 
-        {/* Eyes with animated shine */}
         <g>
-          <circle cx="45" cy="42" r="2" fill={avatar.colors.eyes} />
-          <circle cx="55" cy="42" r="2" fill={avatar.colors.eyes} />
-          <circle 
-            cx="44" 
-            cy="41" 
-            r="0.5" 
-            fill="#FFF" 
-            className="animate-sparkle"
-          />
-          <circle 
-            cx="54" 
-            cy="41" 
-            r="0.5" 
-            fill="#FFF"
-            className="animate-sparkle" 
-          />
+          <circle cx="45" cy="42" r="2" fill="#2E4B9C" />
+          <circle cx="55" cy="42" r="2" fill="#2E4B9C" />
+          <circle cx="44" cy="41" r="0.5" fill="#FFF" className="animate-sparkle" />
+          <circle cx="54" cy="41" r="0.5" fill="#FFF" className="animate-sparkle" />
         </g>
-
       </svg>
-
-      {/* Level indicator with enhanced styling */}
-      {showLevel && (
-        <div 
-          className="absolute -bottom-2 -right-2 text-white text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center transform hover:scale-110 transition-transform duration-200"
-          style={{ 
-            backgroundColor: getClassColors().primary,
-            boxShadow: `0 0 10px ${getClassColors().secondary}`,
-            filter: 'drop-shadow(0 0 2px rgba(0,0,0,0.5))'
-          }}
-        >
-          {avatar.level}
-        </div>
-      )}
+      <div 
+        className="absolute -bottom-2 -right-2 text-white text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center transform hover:scale-110 transition-transform duration-200"
+        style={{ 
+          backgroundColor: 'rgb(220, 38, 38)',
+          boxShadow: 'rgb(248, 113, 113) 0px 0px 10px',
+          filter: 'drop-shadow(rgba(0, 0, 0, 0.5) 0px 0px 2px)'
+        }}
+      >
+        {avatar.level}
+      </div>
     </div>
   );
 };
