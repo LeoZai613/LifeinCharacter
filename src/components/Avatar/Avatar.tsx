@@ -6,6 +6,8 @@ interface AvatarProps {
   size?: 'sm' | 'md' | 'lg' | 'xl';
   showEffects?: boolean;
   showLevel?: boolean;
+  updateAvatar?: (update: Partial<AvatarState>) => void;
+  showControls?: boolean;
 }
 
 const sizeClasses = {
@@ -19,7 +21,9 @@ export const Avatar: React.FC<AvatarProps> = ({
   avatar,
   size = 'md',
   showEffects = true,
-  showLevel = true
+  showLevel = true,
+  updateAvatar,
+  showControls = true
 }) => {
   const isLevelUpRef = useRef(false);
 
@@ -39,25 +43,16 @@ export const Avatar: React.FC<AvatarProps> = ({
         L 67,30
         C 65,20 58,15 50,15
         Z
-
-        M 33,30
-        C 33,30 30,35 29,42
-        C 28,45 28,48 29,51
-        C 30,54 32,56 34,56
-        L 35,52
-        M 67,30
-        C 67,30 70,35 71,42
-        C 72,45 72,48 71,51
-        C 70,54 68,56 66,56
-        L 65,52
-
-        M 33,85
-        C 33,85 35,90 38,95
-        L 40,100
-        C 42,105 45,110 50,110
-        C 55,110 58,105 60,100
-        L 62,95
-        C 65,90 67,85 67,85
+        
+        M 32,40
+        C 25,45 20,55 22,65
+        C 24,75 28,80 34,76
+        L 35,72
+        
+        M 68,40
+        C 75,45 80,55 78,65
+        C 76,75 72,80 66,76
+        L 65,72
       `,
       muscular: `
         M 50,15
@@ -72,25 +67,16 @@ export const Avatar: React.FC<AvatarProps> = ({
         L 70,30
         C 68,20 60,15 50,15
         Z
-
-        M 30,30
-        C 30,30 27,35 26,42
-        C 25,45 25,48 26,51
-        C 27,54 29,56 31,56
-        L 32,52
-        M 70,30
-        C 70,30 73,35 74,42
-        C 75,45 75,48 74,51
-        C 73,54 71,56 69,56
-        L 68,52
-
-        M 30,85
-        C 30,85 32,90 35,95
-        L 37,100
-        C 40,105 45,110 50,110
-        C 55,110 60,105 63,100
-        L 65,95
-        C 68,90 70,85 70,85
+        
+        M 29,40
+        C 20,45 15,60 18,70
+        C 21,80 26,85 32,80
+        L 33,76
+        
+        M 71,40
+        C 80,45 85,60 82,70
+        C 79,80 74,85 68,80
+        L 67,76
       `,
       athletic: `
         M 50,15
@@ -105,25 +91,16 @@ export const Avatar: React.FC<AvatarProps> = ({
         L 68,30
         C 66,20 59,15 50,15
         Z
-
-        M 32,30
-        C 32,30 29,35 28,42
-        C 27,45 27,48 28,51
-        C 29,54 31,56 33,56
-        L 34,52
-        M 68,30
-        C 68,30 71,35 72,42
-        C 73,45 73,48 72,51
-        C 71,54 69,56 67,56
-        L 66,52
-
-        M 32,85
-        C 32,85 34,90 37,95
-        L 39,100
-        C 42,105 46,110 50,110
-        C 54,110 58,105 61,100
-        L 63,95
-        C 66,90 68,85 68,85
+        
+        M 31,40
+        C 23,45 18,58 20,68
+        C 22,78 27,83 33,78
+        L 34,74
+        
+        M 69,40
+        C 77,45 82,58 80,68
+        C 78,78 73,83 67,78
+        L 66,74
       `
     };
     return paths[avatar.features.bodyType as keyof typeof paths] || paths.athletic;
@@ -281,12 +258,39 @@ export const Avatar: React.FC<AvatarProps> = ({
   };
 
   const getFacePath = () => {
-    const paths = {
-      round: 'M 40,35 C 40,30 60,30 60,35 C 60,45 55,55 50,55 C 45,55 40,45 40,35',
-      angular: 'M 40,30 L 60,30 L 58,50 L 42,50 Z',
-      soft: 'M 40,35 Q 50,30 60,35 Q 60,45 50,52 Q 40,45 40,35'
+    return `
+      M 40,35 C 40,30 60,30 60,35
+      C 60,45 55,55 50,55
+      C 45,55 40,45 40,35
+    `;
+  };
+
+  const getHairStyle = () => {
+    const styles = {
+      short: `
+        M 40,30 C 40,25 60,25 60,30
+        C 60,35 55,40 50,40
+        C 45,40 40,35 40,30
+      `,
+      medium: `
+        M 40,30 C 40,25 60,25 60,30
+        C 65,35 60,45 50,45
+        C 40,45 35,35 40,30
+      `,
+      long: `
+        M 40,30 C 40,25 60,25 60,30
+        C 70,40 65,55 50,55
+        C 35,55 30,40 40,30
+      `,
+      bun: `
+        M 40,30 C 40,25 60,25 60,30
+        C 60,35 55,40 50,40
+        C 45,40 40,35 40,30
+        M 45,27 C 45,23 55,23 55,27
+        C 55,31 45,31 45,27
+      `
     };
-    return paths[avatar.features.faceStyle as keyof typeof paths] || paths.round;
+    return styles[avatar.features?.hairStyle as keyof typeof styles] || styles.short;
   };
 
   const getRaceSpecificFeatures = () => {
@@ -297,15 +301,6 @@ export const Avatar: React.FC<AvatarProps> = ({
       orc: 'M 35,35 L 40,25 L 45,35 M 55,35 L 60,25 L 65,35'
     };
     return features[avatar.race as keyof typeof features] || features.human;
-  };
-
-  const getHairPath = () => {
-    const paths = {
-      short: 'M 35,30 C 35,20 65,20 65,30',
-      long: 'M 35,30 C 35,20 65,20 65,30 L 70,60 C 70,60 60,65 50,65 C 40,65 30,60 30,60 Z',
-      spiky: 'M 35,30 L 40,20 L 45,30 L 50,15 L 55,30 L 60,20 L 65,30'
-    };
-    return paths[avatar.features.hairStyle as keyof typeof paths] || paths.short;
   };
 
   const getDefaultClothing = () => {
@@ -415,156 +410,286 @@ export const Avatar: React.FC<AvatarProps> = ({
   };
 
   return (
-    <div className={`relative ${sizeClasses[size]}`}>
-      <svg 
-        viewBox="0 0 100 100" 
-        className="w-full h-full animate-float"
-        style={{ filter: 'drop-shadow(0 0 4px rgba(255,255,255,0.5))' }}
-      >
-        <defs>
-          <radialGradient id="auraGradient" cx="50%" cy="50%" r="50%">
-            <stop offset="0%" stopColor="#F87171" stopOpacity="0.4" />
-            <stop offset="100%" stopColor="#F87171" stopOpacity="0" />
-          </radialGradient>
-          <filter id="glowFilter">
-            <feGaussianBlur stdDeviation="2" result="coloredBlur" />
-            <feMerge>
-              <feMergeNode in="coloredBlur" />
-              <feMergeNode in="SourceGraphic" />
-            </feMerge>
-          </filter>
-        </defs>
+    <div className="flex flex-col gap-4 w-full">
+      {showControls && updateAvatar && (
+        <>
+          <div className="flex flex-col gap-2">
+            <label className="text-white text-sm">Race</label>
+            <div className="grid grid-cols-4 gap-2">
+              {['Human', 'Elf', 'Dwarf', 'Orc'].map((race) => (
+                <button
+                  key={race}
+                  className={`p-2 rounded ${
+                    avatar.race === race.toLowerCase()
+                      ? 'bg-purple-600'
+                      : 'bg-gray-700 hover:bg-gray-600'
+                  } text-white transition-colors`}
+                  onClick={() => updateAvatar({ race: race.toLowerCase() })}
+                >
+                  {race}
+                </button>
+              ))}
+            </div>
+          </div>
 
-        <circle 
-          cx="50" 
-          cy="50" 
-          r="45" 
-          fill="url(#auraGradient)" 
-          className="animate-glow"
-        />
+          <div className="flex flex-col gap-2">
+            <label className="text-white text-sm">Hair Style</label>
+            <div className="grid grid-cols-4 gap-2">
+              {['Short', 'Medium', 'Long', 'Bun'].map((style) => (
+                <button
+                  key={style}
+                  className={`p-2 rounded ${
+                    avatar.features?.hairStyle === style.toLowerCase()
+                      ? 'bg-purple-600'
+                      : 'bg-gray-700 hover:bg-gray-600'
+                  } text-white transition-colors`}
+                  onClick={() =>
+                    updateAvatar({
+                      features: { ...avatar.features, hairStyle: style.toLowerCase() }
+                    })
+                  }
+                >
+                  {style}
+                </button>
+              ))}
+            </div>
+          </div>
 
-        <g>
-          <path
-            d={getBodyPath()}
-            fill="rgba(0,0,0,0.2)"
-            strokeWidth="0"
-            transform="translate(2, 2)"
+          <div className="flex flex-col gap-2">
+            <label className="text-white text-sm">Class</label>
+            <div className="grid grid-cols-4 gap-2">
+              {['Warrior', 'Mage', 'Rogue', 'Cleric'].map((cls) => (
+                <button
+                  key={cls}
+                  className={`p-2 rounded ${
+                    avatar.class === cls.toLowerCase()
+                      ? 'bg-purple-600'
+                      : 'bg-gray-700 hover:bg-gray-600'
+                  } text-white transition-colors`}
+                  onClick={() => updateAvatar({ class: cls.toLowerCase() })}
+                >
+                  {cls}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="flex flex-col gap-2">
+            <label className="text-white text-sm">Body Type</label>
+            <div className="grid grid-cols-3 gap-2">
+              {['Athletic', 'Slim', 'Muscular'].map((type) => (
+                <button
+                  key={type}
+                  className={`p-2 rounded ${
+                    avatar.features?.bodyType === type.toLowerCase()
+                      ? 'bg-purple-600'
+                      : 'bg-gray-700 hover:bg-gray-600'
+                  } text-white transition-colors`}
+                  onClick={() =>
+                    updateAvatar({
+                      features: { ...avatar.features, bodyType: type.toLowerCase() }
+                    })
+                  }
+                >
+                  {type}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="flex flex-col gap-2">
+            <label className="text-white text-sm">Colors</label>
+            <div className="grid grid-cols-3 gap-4">
+              <div>
+                <label className="text-white text-xs mb-1 block">Skin</label>
+                <input
+                  type="color"
+                  value={avatar.colors.skin}
+                  onChange={(e) =>
+                    updateAvatar({
+                      colors: { ...avatar.colors, skin: e.target.value }
+                    })
+                  }
+                  className="w-full h-8 rounded cursor-pointer"
+                />
+              </div>
+              <div>
+                <label className="text-white text-xs mb-1 block">Hair</label>
+                <input
+                  type="color"
+                  value={avatar.colors.hair}
+                  onChange={(e) =>
+                    updateAvatar({
+                      colors: { ...avatar.colors, hair: e.target.value }
+                    })
+                  }
+                  className="w-full h-8 rounded cursor-pointer"
+                />
+              </div>
+              <div>
+                <label className="text-white text-xs mb-1 block">Eyes</label>
+                <input
+                  type="color"
+                  value={avatar.colors.eyes}
+                  onChange={(e) =>
+                    updateAvatar({
+                      colors: { ...avatar.colors, eyes: e.target.value }
+                    })
+                  }
+                  className="w-full h-8 rounded cursor-pointer"
+                />
+              </div>
+            </div>
+          </div>
+        </>
+      )}
+
+      <div className={`relative ${sizeClasses[size]}`}>
+        <svg 
+          viewBox="0 0 100 100" 
+          className="w-full h-full animate-float"
+          style={{ filter: 'drop-shadow(0 0 4px rgba(255,255,255,0.5))' }}
+        >
+          <defs>
+            <radialGradient id="auraGradient" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stopColor="#F87171" stopOpacity="0.4" />
+              <stop offset="100%" stopColor="#F87171" stopOpacity="0" />
+            </radialGradient>
+            <filter id="glowFilter">
+              <feGaussianBlur stdDeviation="2" result="coloredBlur" />
+              <feMerge>
+                <feMergeNode in="coloredBlur" />
+                <feMergeNode in="SourceGraphic" />
+              </feMerge>
+            </filter>
+          </defs>
+
+          <circle 
+            cx="50" 
+            cy="50" 
+            r="45" 
+            fill="url(#auraGradient)" 
+            className="animate-glow"
           />
-          <circle cx="34" cy="32" r="2" fill="rgba(0,0,0,0.1)" />
-          <circle cx="66" cy="32" r="2" fill="rgba(0,0,0,0.1)" />
-          <circle cx="38" cy="77" r="2" fill="rgba(0,0,0,0.1)" />
-          <circle cx="62" cy="77" r="2" fill="rgba(0,0,0,0.1)" />
-          <path
-            d={`
-              M 36,42 C 34,45 34,49 36,52
-              M 64,42 C 66,45 66,49 64,52
-              M 42,67 C 45,69 48,70 50,70
-              M 50,70 C 52,69 55,69 58,67
-              M 38,85 C 37,88 36,91 35,93
-              M 62,85 C 63,88 64,91 65,93
-              M 42,35 L 58,35
-              M 41,45 L 59,45
-            `}
-            stroke="rgba(0,0,0,0.1)"
-            strokeWidth="1"
-            fill="none"
-          />
-        </g>
 
-        <g>
           <g>
             <path
-              d="M 45,50 L 55,50 M 40,60 L 60,60"
-              stroke="#F87171"
-              strokeWidth="2"
+              d={getBodyPath()}
+              fill={avatar.colors.skin}
+              stroke="#000"
+              strokeWidth="1"
+            >
+              <title>Body</title>
+            </path>
+            <circle cx="34" cy="32" r="2" fill="rgba(0,0,0,0.1)" />
+            <circle cx="66" cy="32" r="2" fill="rgba(0,0,0,0.1)" />
+            <circle cx="38" cy="77" r="2" fill="rgba(0,0,0,0.1)" />
+            <circle cx="62" cy="77" r="2" fill="rgba(0,0,0,0.1)" />
+            <path
+              d={`
+                M 36,42 C 34,45 34,49 36,52
+                M 64,42 C 66,45 66,49 64,52
+                M 42,67 C 45,69 48,70 50,70
+                M 50,70 C 52,69 55,69 58,67
+                M 38,85 C 37,88 36,91 35,93
+                M 62,85 C 63,88 64,91 65,93
+                M 42,35 L 58,35
+                M 41,45 L 59,45
+              `}
+              stroke="rgba(0,0,0,0.1)"
+              strokeWidth="1"
               fill="none"
             />
-            <path
-              d="M 30,30 L 70,70 M 30,70 L 70,30"
-              stroke="#F87171"
-              strokeWidth="0.5"
-              opacity="0.4"
-              className="animate-pulse-slow"
-            />
           </g>
-        </g>
 
-        <path
-          d={getDefaultClothing()}
-          fill="rgba(139,69,19, 0.8)"
-          stroke="#000"
-          strokeWidth="1"
-        />
+          <g>
+            <g>
+              <path
+                d="M 45,50 L 55,50 M 40,60 L 60,60"
+                stroke="#F87171"
+                strokeWidth="2"
+                fill="none"
+              />
+              <path
+                d="M 30,30 L 70,70 M 30,70 L 70,30"
+                stroke="#F87171"
+                strokeWidth="0.5"
+                opacity="0.4"
+                className="animate-pulse-slow"
+              />
+            </g>
+          </g>
 
-        <path
-          d={`
-            M 40,45 L 60,45
-            M 42,50 L 58,50
-            M 44,90 L 56,90
-          `}
-          stroke="rgba(0,0,0,0.3)"
-          strokeWidth="1"
-          fill="none"
-        />
-
-        <path
-          d={getFacePath()}
-          fill="#FFD1AA"
-          stroke="#000"
-          strokeWidth="1"
-        />
-
-        <path
-          d="M 43,43 C 43,41 45,41 45,43 M 55,43 C 55,41 57,41 57,43"
-          fill="rgba(255,150,150,0.3)"
-          stroke="none"
-        />
-
-        <path
-          d="M 46,46 C 48,48 52,48 54,46"
-          stroke="#000"
-          strokeWidth="1"
-          fill="none"
-        />
-
-        <path
-          d={getRaceSpecificFeatures()}
-          fill="#FFD1AA"
-          stroke="#000"
-          strokeWidth="1"
-        />
-
-        <g>
           <path
-            d="M 35,30 C 35,20 65,20 65,30"
-            fill="#4A3728"
+            d={getDefaultClothing()}
+            fill={getClassColors().primary}
             stroke="#000"
             strokeWidth="1"
           />
-          <path
-            d="M 35,30 C 35,20 65,20 65,30"
-            fill="rgba(255,255,255,0.2)"
-            strokeWidth="0"
-            transform="translate(-1, -1) scale(0.95)"
-          />
-        </g>
 
-        <g>
-          <circle cx="45" cy="42" r="2" fill="#2E4B9C" />
-          <circle cx="55" cy="42" r="2" fill="#2E4B9C" />
-          <circle cx="44" cy="41" r="0.5" fill="#FFF" className="animate-sparkle" />
-          <circle cx="54" cy="41" r="0.5" fill="#FFF" className="animate-sparkle" />
-        </g>
-      </svg>
-      <div 
-        className="absolute -bottom-2 -right-2 text-white text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center transform hover:scale-110 transition-transform duration-200"
-        style={{ 
-          backgroundColor: 'rgb(220, 38, 38)',
-          boxShadow: 'rgb(248, 113, 113) 0px 0px 10px',
-          filter: 'drop-shadow(rgba(0, 0, 0, 0.5) 0px 0px 2px)'
-        }}
-      >
-        {avatar.level}
+          <path
+            d={`
+              M 40,45 L 60,45
+              M 42,50 L 58,50
+              M 44,90 L 56,90
+            `}
+            stroke="rgba(0,0,0,0.3)"
+            strokeWidth="1"
+            fill="none"
+          />
+
+          <g>
+            <path
+              d={getHairStyle()}
+              fill={avatar.colors.hair}
+              stroke="#000"
+              strokeWidth="1"
+            />
+            <path
+              d={getFacePath()}
+              fill={avatar.colors.skin}
+              stroke="#000"
+              strokeWidth="1"
+            />
+          </g>
+
+          <path
+            d="M 43,43 C 43,41 45,41 45,43 M 55,43 C 55,41 57,41 57,43"
+            fill="rgba(255,150,150,0.3)"
+            stroke="none"
+          />
+
+          <path
+            d="M 46,46 C 48,48 52,48 54,46"
+            stroke="#000"
+            strokeWidth="1"
+            fill="none"
+          />
+
+          <path
+            d={getRaceSpecificFeatures()}
+            fill="#FFD1AA"
+            stroke="#000"
+            strokeWidth="1"
+          />
+
+          <g>
+            <circle cx="45" cy="42" r="2" fill="#2E4B9C" />
+            <circle cx="55" cy="42" r="2" fill="#2E4B9C" />
+            <circle cx="44" cy="41" r="0.5" fill="#FFF" className="animate-sparkle" />
+            <circle cx="54" cy="41" r="0.5" fill="#FFF" className="animate-sparkle" />
+          </g>
+        </svg>
+        <div 
+          className="absolute -bottom-2 -right-2 text-white text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center transform hover:scale-110 transition-transform duration-200"
+          style={{ 
+            backgroundColor: 'rgb(220, 38, 38)',
+            boxShadow: 'rgb(248, 113, 113) 0px 0px 10px',
+            filter: 'drop-shadow(rgba(0, 0, 0, 0.5) 0px 0px 2px)'
+          }}
+        >
+          {avatar.level}
+        </div>
       </div>
     </div>
   );
