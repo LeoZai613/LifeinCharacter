@@ -17,26 +17,52 @@ export const CharacterDashboard = () => {
 
   const handleAddHabit = isDebugMode ? debugStore.addHabit : userStore.addHabit;
   const handleAddDaily = isDebugMode ? debugStore.addDaily : userStore.addDaily;
+  const handleAddTodo = isDebugMode ? debugStore.addTodo : userStore.addTodo;
   const handleCompleteDaily = isDebugMode ? debugStore.completeDaily : userStore.completeDaily;
+  const handleCompleteTodo = isDebugMode ? debugStore.completeTodo : userStore.completeTodo;
   const handleToggleHabit = isDebugMode ? debugStore.toggleHabit : userStore.toggleHabit;
 
-  // Calculate stat buffs from habit streaks
+  // Calculate stat buffs from habits, dailies, and todos
   const statBuffs = useMemo(() => {
-    if (!character?.habits) return {};
+    if (!character?.habits || !character?.dailies || !character?.todos) return {};
 
     const buffs: Partial<Record<keyof typeof character.stats, number>> = {};
     
+    // Buffs from habits (1 point per positive count)
     character.habits.forEach(habit => {
       if (habit.count > 0) {
         const stat = habit.associatedStat;
-        const buffAmount = Math.floor(habit.count); // 1 point per positive count
+        const buffAmount = Math.floor(habit.count);
         buffs[stat] = (buffs[stat] || 0) + buffAmount;
       }
     });
 
-    console.log('Calculating buffs:', { calculatedBuffs: buffs, habits: character.habits });
+    // Buffs from dailies (1 point per 3 days of streak)
+    character.dailies.forEach(daily => {
+      if (daily.streak > 0) {
+        const stat = daily.associatedStat;
+        const buffAmount = Math.floor(daily.streak / 3); // 1 point per 3 days of streak
+        buffs[stat] = (buffs[stat] || 0) + buffAmount;
+      }
+    });
+
+    // Buffs from completed todos (2 points per completed todo)
+    character.todos.forEach(todo => {
+      if (todo.completed) {
+        const stat = todo.associatedStat;
+        const buffAmount = 2; // 2 points per completed todo
+        buffs[stat] = (buffs[stat] || 0) + buffAmount;
+      }
+    });
+
+    console.log('Calculating buffs:', { 
+      calculatedBuffs: buffs, 
+      habits: character.habits,
+      dailies: character.dailies,
+      todos: character.todos 
+    });
     return buffs;
-  }, [character?.habits]);
+  }, [character?.habits, character?.dailies, character?.todos]);
 
   if (!character) {
     return <div>Loading character...</div>;
@@ -165,8 +191,11 @@ export const CharacterDashboard = () => {
         habits={character.habits}
         dailies={character.dailies}
         todos={character.todos}
+        onAddHabit={handleAddHabit}
+        onAddDaily={handleAddDaily}
+        onAddTodo={handleAddTodo}
         onCompleteDaily={handleCompleteDaily}
-        onCompleteTodo={handleToggleHabit}
+        onCompleteTodo={handleCompleteTodo}
         onToggleHabit={handleToggleHabit}
       />
     </div>
